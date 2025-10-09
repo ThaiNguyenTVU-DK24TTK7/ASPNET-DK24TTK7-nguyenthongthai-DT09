@@ -1,0 +1,109 @@
+@model Ecommerce.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .profile-container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 30px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .profile-header {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+</style>
+
+<div class="profile-container">
+    <div class="profile-header">
+        <h2>@ViewData["Title"]</h2>
+        <p>Quản lý thông tin cá nhân của bạn.</p>
+    </div>
+
+    @if (ViewData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" role="alert">
+            @ViewData["SuccessMessage"]
+        </div>
+    }
+
+    <form asp-action="Profile" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="form-group">
+            <label asp-for="HoTen" class="form-label"></label>
+            <input asp-for="HoTen" class="form-control" />
+            <span asp-validation-for="HoTen" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="SoDienThoai" class="form-label"></label>
+            <input asp-for="SoDienThoai" class="form-control" />
+            <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+        </div>
+
+        <div class="form-group text-center">
+            <button type="submit" class="btn btn-primary px-5">Lưu thay đổi</button>
+        </div>
+    </form>
+</div>
+
+<div class="profile-container mt-4">
+    <div class="profile-header">
+        <h4>Đổi mật khẩu</h4>
+    </div>
+
+    @if (TempData["PasswordSuccess"] != null)
+    {
+        <div class="alert alert-success">@TempData["PasswordSuccess"]</div>
+    }
+    @if (TempData["PasswordError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["PasswordError"]</div>
+    }
+
+    <form asp-action="ChangePassword" method="post">
+        @Html.AntiForgeryToken()
+        
+        <div class="form-group">
+            <label for="OldPassword" class="form-label">Mật khẩu cũ</label>
+            <input name="OldPassword" type="password" class="form-control" required />
+        </div>
+
+        <div class="form-group">
+            <label for="NewPassword" class="form-label">Mật khẩu mới</label>
+            <input name="NewPassword" type="password" class="form-control" required />
+        </div>
+
+        <div class="form-group">
+            <label for="ConfirmPassword" class="form-label">Xác nhận mật khẩu mới</label>
+            <input name="ConfirmPassword" type="password" class="form-control" required />
+        </div>
+
+        <div class="form-group text-center">
+            <button type="submit" class="btn btn-secondary px-5">Đổi mật khẩu</button>
+        </div>
+    </form>
+</div> 

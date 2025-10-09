@@ -1,0 +1,129 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+.order-history-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+h1 {
+    font-size: 28px;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+.order-table-header, .order-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1.2fr;
+    align-items: center;
+    padding: 15px;
+    gap: 15px;
+    box-sizing: border-box;
+}
+
+.order-table-header {
+    background-color: #f2f2f2;
+    font-weight: 600;
+    border-radius: 5px;
+    color: #555;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.order-row {
+    border-bottom: 1px solid #eee;
+}
+
+.order-row:last-child {
+    border-bottom: none;
+}
+
+.product-info {
+    display: flex;
+    align-items: center;
+}
+
+.product-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 5px;
+    margin-right: 15px;
+    object-fit: cover;
+    background-color: #e0e0e0;
+}
+
+.product-info div {
+    display: flex;
+    flex-direction: column;
+}
+
+.order-code {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.product-name {
+    font-size: 14px;
+    color: #666;
+}
+
+.status {
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+}
+
+.status::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-chờ-xử-lý { background-color: #fff0c1; color: #f59e0b; }
+.status-chờ-xử-lý::before { background-color: #f59e0b; }
+
+.status-đang-giao { background-color: #cce5ff; color: #007bff; }
+.status-đang-giao::before { background-color: #007bff; }
+
+.status-đã-giao-thành-công { background-color: #d4edda; color: #155724; }
+.status-đã-giao-thành-công::before { background-color: #155724; }
+
+.status-đã-hủy { background-color: #f8d7da; color: #721c24; }
+.status-đã-hủy::before { background-color: #721c24; }
+
+.reorder-link {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.reorder-link:hover {
+    text-decoration: underline;
+}
+
+.no-orders {
+    text-align: center;
+    padding: 50px;
+    font-size: 18px;
+    color: #888;
+}
+
+.order-cell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-sizing: border-box;
+} 

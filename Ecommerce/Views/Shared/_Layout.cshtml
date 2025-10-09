@@ -1,0 +1,157 @@
+@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HUỲNH GIA Laptop</title>
+
+    <!-- Bootstrap & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- Fonts -->
+    <link rel="stylesheet" href="~/css/Header.css" />
+    <link rel="stylesheet" href="~/css/Footer.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <!-- Anti-forgery token for AJAX requests -->
+    @Html.AntiForgeryToken()
+    
+    <header>
+        <nav>
+            <div class="nav-container">
+                <div class="nav-left">
+                    <a class="nav-brand" asp-controller="Home" asp-action="Index">HUỲNH GIA</a>
+                    <ul class="nav-menu">
+                        <li><a asp-controller="Home" asp-action="Index">Trang Chủ</a></li>
+                        <li><a asp-controller="SanPham" asp-action="Index">Sản Phẩm</a></li>
+                        <li><a asp-controller="Contact" asp-action="Index">Liên Lạc</a></li>
+                    </ul>
+                </div>
+                <div class="nav-center">
+                    <form class="search-box" asp-controller="SanPham" asp-action="Index" method="get">
+                        <input type="text" name="searchString" placeholder="Tìm kiếm sản phẩm..." value="@ViewData["CurrentFilter"]">
+                        <button type="submit" style="background: transparent; border: none; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer;"><i class="bi bi-search"></i></button>
+                    </form>
+                </div>
+                <div class="nav-icons">
+                    <a href="@Url.Action("Index", "YeuThich")" class="nav-icon" title="Sản phẩm yêu thích">
+                        <i class="bi bi-heart"></i>
+                    </a>
+                    <a href="@Url.Action("Index", "GioHang")" class="nav-icon" title="Giỏ hàng">
+                        <i class="bi bi-cart2"></i>
+                    </a>
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <div class="dropdown d-inline-block" style="margin-left:10px;">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-weight:500; color:#333;">
+                                <i class="bi bi-person-circle"></i> Xin chào, @User.Identity.Name
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Dashboard"><i class="bi bi-person-gear"></i> Trang Quản trị</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                }
+                                <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile"><i class="bi bi-person"></i> Thông tin cá nhân</a></li>
+                                <li><a class="dropdown-item" asp-controller="Account" asp-action="OrderHistory"><i class="bi bi-clock-history"></i> Lịch sử đơn hàng</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post">
+                                        <button type="submit" class="dropdown-item" style="border:none; background:none; width:100%; text-align:left;">
+                                            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Login", "Account")" class="nav-icon" title="Đăng nhập">
+                            <i class="bi bi-person-circle"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer>
+        <div class="footer-main">
+            <!-- Subscribe Section -->
+            <div class="footer-section subscribe-section">
+                <div class="footer-brand">HUỲNH GIA</div>
+                <h3>Subscribe</h3>
+                <p>Nhận giảm giá 10% cho đơn hàng đầu tiên của bạn</p>
+                <form class="email-subscribe">
+                    <input type="email" placeholder="Enter your email">
+                    <button type="submit"><i class="bi bi-arrow-right"></i></button>
+                </form>
+            </div>
+
+            <!-- Support Section -->
+            <div class="footer-section">
+                <h3>Hỗ Trợ</h3>
+                <ul class="footer-links">
+                    <li>Đặng Ngọc Tân,<br>TDM, Bình Dương, Việt Nam</li>
+                    <li><a href="mailto:info.dangngoctan@gmail.com">info.dangngoctan@gmail.com</a></li>
+                    <li><a href="tel:+0376760356">0376760356</a></li>
+                </ul>
+            </div>
+
+            <!-- Quick Links Section -->
+            <div class="footer-section">
+                <h3>Liên Kết Nhanh</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Chính sách bảo mật</a></li>
+                    <li><a href="#">Điều khoản sử dụng</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Liên hệ</a></li>
+                </ul>
+            </div>
+
+            <!-- Download App Section -->
+            <div class="footer-section app-section">
+                <h3>Tải Ứng dụng</h3>
+                <p style="font-size: 0.8rem; margin-bottom: 1rem;">Save $3 with App New User Only</p>
+                <div class="qr-code"></div>
+                <div class="app-buttons">
+                    <a href="#" class="app-button">
+                        <i class="bi bi-google-play"></i>
+                        Google Play
+                    </a>
+                    <a href="#" class="app-button">
+                        <i class="bi bi-apple"></i>
+                        App Store
+                    </a>
+                </div>
+                <div class="social-icons">
+                    <a href="#"><i class="bi bi-facebook"></i></a>
+                    <a href="#"><i class="bi bi-twitter"></i></a>
+                    <a href="#"><i class="bi bi-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>Copyright © 2024 HUỲNH GIA Laptop Store,Inc</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

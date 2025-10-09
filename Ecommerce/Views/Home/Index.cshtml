@@ -1,0 +1,332 @@
+@model Ecommerce.ViewModels.HomeViewModel
+@{
+    ViewData["Title"] = "Trang Chủ";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/header.css" />
+    <link rel="stylesheet" href="~/css/footer.css" />
+    <link rel="stylesheet" href="~/css/home.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .product-card.hidden {
+            display: none;
+        }
+        .slider .buttons {
+            display: none;
+        }
+    </style>
+}
+    <div class="slider">
+        <div class="list">
+            <div class="item active">
+                <div class="hero-container">
+                    <div class="hero-content">
+                        <h1>
+                            LAPTOP <span class="discount">GIÁ RẺ</span><br>
+                            CHẤT LƯỢNG<br>
+                            CAO CẤP
+                        </h1>
+                        <p>Khám phá bộ sưu tập laptop mới nhất với công nghệ tiên tiến và hiệu năng mạnh mẽ. Ưu đãi lên đến 30% cho các dòng laptop gaming và văn phòng.</p>
+                        <a href="@Url.Action("Index", "SanPham")" class="cta-button">Mua Ngay</a>
+                    </div>
+                    <div class="hero-image">
+                        <img src="~/images/banner.png" alt="Laptop Gaming">
+                        <div class="star-decoration star-1">✦</div>
+                        <div class="star-decoration star-2">✦</div>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <div class="hero-container">
+                    <div class="hero-content">
+                        <h1>
+                            LAPTOP <span class="discount">GAMING</span><br>
+                            2024<br>
+                            HIỆU NĂNG CAO
+                        </h1>
+                        <p>Laptop gaming mới nhất 2024 với card đồ họa RTX, CPU Intel/AMD mạnh mẽ. Trải nghiệm game mượt mà với độ phân giải cao.</p>
+                        <a href="@Url.Action("Index", "SanPham")" class="cta-button">Khám Phá Ngay</a>
+                    </div>
+                    <div class="hero-image">
+                        <img src="~/images/banner1.png" alt="Gaming Laptop">
+                        <div class="star-decoration star-1">✦</div>
+                        <div class="star-decoration star-2">✦</div>
+                    </div>
+                </div>
+            </div>
+            <div class="item">
+                <div class="hero-container">
+                    <div class="hero-content">
+                        <h1>
+                            LAPTOP <span class="discount">VĂN PHÒNG</span><br>
+                            MỎNG NHẸ<br>
+                            BỀN BỈ
+                        </h1>
+                        <p>Laptop văn phòng với thiết kế mỏng nhẹ, pin trâu và hiệu năng ổn định. Hoàn hảo cho công việc và học tập.</p>
+                        <a href="@Url.Action("Index", "SanPham")" class="cta-button">Mua Ngay</a>
+                    </div>
+                    <div class="hero-image">
+                        <img src="~/images/banner2.png" alt="Office Laptop">
+                        <div class="star-decoration star-1">✦</div>
+                        <div class="star-decoration star-2">✦</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Navigation buttons -->
+        <div class="buttons">
+            <button id="prev"><i class="bi bi-chevron-left"></i></button>
+            <button id="next"><i class="bi bi-chevron-right"></i></button>
+        </div>
+        <!-- Dots indicator -->
+        <ul class="dots">
+            <li class="active" data-slide="0"></li>
+            <li data-slide="1"></li>
+            <li data-slide="2"></li>
+        </ul>
+    </div>
+
+
+<div class="product">
+    <div class="content">
+        <p>Laptop Nổi Bật</p>
+        <button id="loadMoreBtn">Xem Thêm <i class="bi bi-chevron-right"></i></button>
+    </div>
+    <div class="product-list">
+        @for (int i = 0; i < Model.SanPhams.Count(); i++)
+        {
+            var item = Model.SanPhams[i];
+            var sp = item.SanPham;
+            var soSao = (int)Math.Round(item.SoSaoTrungBinh);
+            var isFavorite = Model.FavoriteProductIds != null && Model.FavoriteProductIds.Contains(sp.Id);
+
+            <div class="product-card @(i >= 4 ? "hidden" : "")">
+                <div class="product-image">
+                    <a href="@Url.Action("Details", "SanPham", new { id = sp.Id })">
+                        <img src="@sp.DuongDanAnh" alt="@sp.Ten" />
+                    </a>
+                    <button class="favorite-btn@(isFavorite ? " active" : "")" data-product-id="@sp.Id" data-tooltip="@(isFavorite ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích")">
+                        <i class="bi @(isFavorite ? "bi-heart-fill" : "bi-heart")"></i>
+                    </button>
+                    @if (sp.GiaGiam.HasValue && sp.GiaGiam.Value < sp.Gia)
+                    {
+                        <div class="discount-badge">
+                            -@((int)((1 - sp.GiaGiam.Value / sp.Gia) * 100))%
+                        </div>
+                    }
+                </div>
+                <div class="product-info">
+                    <p class="product-title">@sp.Ten</p>
+                    <div class="product-rating">
+                        <div>
+                            @for (int j = 0; j < soSao; j++)
+                            {
+                                <i class="bi bi-star-fill" style="color:#ffd700;"></i>
+                            }
+                            @for (int j = soSao; j < 5; j++)
+                            {
+                                <i class="bi bi-star" style="color:#ffd700;"></i>
+                            }
+                        </div>
+                        <span>@sp.SoLuongBan Lượt Bán</span>
+                    </div>
+                    <div class="product-price-row">
+                        @if (sp?.GiaGiam.HasValue == true && sp.GiaGiam.Value < sp.Gia)
+                        {
+                            <span class="original-price">@sp.Gia.ToString("N0") VNĐ</span>
+                            <span class="current-price">@sp.GiaGiam.Value.ToString("N0") VNĐ</span>
+                        }
+                        else if (sp != null)
+                        {
+                            <span class="current-price">@sp.Gia.ToString("N0") VNĐ</span>
+                        }
+                        <a href="@Url.Action("Details", "SanPham", new { id = sp.Id })" class="add-icon" title="Thêm vào giỏ">
+                            <i class="bi bi-plus-circle"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Danh Mục Sản Phẩm -->
+<div class="category-product">
+    <div class="category-title">
+        <p>Danh Mục Laptop</p>
+    </div>
+    <div class="category-list">
+        @foreach (var dm in Model.DanhMucs.Take(3))
+        {
+            var imgSrc = string.IsNullOrWhiteSpace(dm.DuongDanAnh)
+                ? "/images/placeholder.png"
+                : "/" + dm.DuongDanAnh.TrimStart('/');
+            <div class="category-item">
+                <a href="@Url.Action("Index", "SanPham", new { danhMucId = dm.Id })">
+                    <img src="@imgSrc" alt="@dm.Ten" />
+                </a>
+                <span>@dm.Ten</span>
+            </div>
+        }
+    </div>
+</div>
+<div class="home-services">
+    <div class="service-item">
+        <i class="bi bi-truck"></i>
+        <div class="service-title">GIAO HÀNG MIỄN PHÍ</div>
+        <div class="service-desc">Miễn phí giao hàng cho đơn hàng trên 3 triệu VNĐ</div>
+    </div>
+    <div class="service-item">
+        <i class="bi bi-headset"></i>
+        <div class="service-title">HỖ TRỢ 24/7</div>
+        <div class="service-desc">Tư vấn kỹ thuật và hỗ trợ khách hàng 24/7</div>
+    </div>
+    <div class="service-item">
+        <i class="bi bi-shield-check"></i>
+        <div class="service-title">BẢO HÀNH CHÍNH HÃNG</div>
+        <div class="service-desc">Bảo hành chính hãng từ 12-36 tháng</div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/js/Home.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Load more products logic
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            const productList = document.querySelector('.product-list');
+
+            if (loadMoreBtn && productList) {
+                const totalProducts = productList.querySelectorAll('.product-card').length;
+                const productsToShow = 4;
+                
+                function updateButtonVisibility() {
+                    const hiddenProducts = productList.querySelectorAll('.product-card.hidden').length;
+                    if (hiddenProducts === 0) {
+                        loadMoreBtn.style.display = 'none';
+                    } else {
+                        loadMoreBtn.style.display = 'inline-block';
+                    }
+                }
+
+                loadMoreBtn.addEventListener('click', function () {
+                    const hiddenProducts = productList.querySelectorAll('.product-card.hidden');
+                    for (let i = 0; i < productsToShow && i < hiddenProducts.length; i++) {
+                        hiddenProducts[i].classList.remove('hidden');
+                    }
+                    updateButtonVisibility();
+                });
+
+                if (totalProducts <= productsToShow) {
+                     loadMoreBtn.style.display = 'none';
+                }
+            }
+
+            // Favorite button logic
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-product-id');
+                    if (productId) {
+                        toggleFavorite(this, productId);
+                    }
+                });
+            });
+
+            // Debug info
+            console.log('Home page loaded');
+            console.log('Anti-forgery token exists:', document.querySelector('input[name="__RequestVerificationToken"]') !== null);
+            console.log('Favorite buttons found:', document.querySelectorAll('.favorite-btn').length);
+        });
+
+        function toggleFavorite(element, productId) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const formData = new FormData();
+            if(token) {
+                formData.append('__RequestVerificationToken', token);
+            }
+            
+            fetch(`/YeuThich/Toggle/${productId}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.status === 401) {
+                     return { success: false, redirectTo: '/Account/Login', message: 'Vui lòng đăng nhập.' };
+                }
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    const icon = element.querySelector('i');
+                    if (data.favorited) {
+                        element.classList.add('active');
+                        element.setAttribute('data-tooltip', 'Bỏ khỏi yêu thích');
+                        icon.classList.remove('bi-heart');
+                        icon.classList.add('bi-heart-fill');
+                        showMessage('Đã thêm vào danh sách yêu thích!', 'success');
+                    } else {
+                        element.classList.remove('active');
+                        element.setAttribute('data-tooltip', 'Thêm vào yêu thích');
+                        icon.classList.remove('bi-heart-fill');
+                        icon.classList.add('bi-heart');
+                        showMessage('Đã xóa khỏi danh sách yêu thích!', 'info');
+                    }
+                } else {
+                    if (data.redirectTo) {
+                        showMessage(data.message || 'Vui lòng đăng nhập để sử dụng tính năng yêu thích!', 'error');
+                        setTimeout(() => {
+                            window.location.href = data.redirectTo;
+                        }, 1500);
+                    } else {
+                        showMessage(data.message || 'Có lỗi xảy ra!', 'error');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error toggling favorite:', error);
+                showMessage('Có lỗi xảy ra! Vui lòng thử lại.', 'error');
+            });
+        }
+
+        function showMessage(message, type) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 5px;
+                color: white;
+                font-weight: bold;
+                z-index: 1000;
+                transform: translateX(110%);
+                transition: transform 0.3s ease;
+            `;
+            
+            switch(type) {
+                case 'success': toast.style.backgroundColor = '#28a745'; break;
+                case 'error': toast.style.backgroundColor = '#dc3545'; break;
+                case 'info': toast.style.backgroundColor = '#17a2b8'; break;
+            }
+            
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                toast.style.transform = 'translateX(110%)';
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+    </script>
+}

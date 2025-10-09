@@ -1,0 +1,142 @@
+@model Ecommerce.ViewModels.AdminContactDetailViewModel
+@{
+    ViewData["Title"] = "Chi tiết Liên hệ";
+    Layout = "_AdminLayout";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/AdminContact.css" />
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3><i class="bi bi-envelope-open me-2"></i>Chi tiết Liên hệ</h3>
+    <a asp-action="ContactList" class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Quay lại
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4 contact-detail-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-chat-dots me-2"></i>Tin nhắn từ khách hàng
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="contact-info-grid">
+                    <div class="contact-info-item">
+                        <label>Họ tên</label>
+                        <p>@Model.HoTen</p>
+                    </div>
+                    <div class="contact-info-item">
+                        <label>Email</label>
+                        <p>@Model.Email</p>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.TenNguoiDung))
+                    {
+                        <div class="contact-info-item">
+                            <label>Tài khoản</label>
+                            <p>@Model.TenNguoiDung</p>
+                        </div>
+                        <div class="contact-info-item">
+                            <label>Số điện thoại</label>
+                            <p>@Model.SoDienThoaiNguoiDung</p>
+                        </div>
+                    }
+                    <div class="contact-info-item">
+                        <label>Chủ đề</label>
+                        <p>@Model.ChuDe</p>
+                    </div>
+                    <div class="contact-info-item">
+                        <label>Ngày gửi</label>
+                        <p>@Model.NgayGui.ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                </div>
+                
+                <div class="contact-message">
+                    <label class="form-label fw-bold">Nội dung:</label>
+                    <div class="mt-2">
+                        @Html.Raw(Model.NoiDung.Replace("\n", "<br>"))
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Trạng thái:</label>
+                    <div>
+                        @if (Model.TrangThai == "Mới")
+                        {
+                            <span class="badge status-badge status-new">Mới</span>
+                        }
+                        else if (Model.TrangThai == "Đã đọc")
+                        {
+                            <span class="badge status-badge status-read">Đã đọc</span>
+                        }
+                        else if (Model.TrangThai == "Đã phản hồi")
+                        {
+                            <span class="badge status-badge status-replied">Đã phản hồi</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">@Model.TrangThai</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm contact-detail-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-reply me-2"></i>Phản hồi
+                </h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="ContactDetail" method="post" class="response-form">
+                    <input type="hidden" asp-for="Id" />
+                    
+                    <div class="mb-3">
+                        <label asp-for="PhanHoiMoi" class="form-label">Nội dung phản hồi:</label>
+                        <textarea asp-for="PhanHoiMoi" class="form-control" rows="8" 
+                                  placeholder="Nhập nội dung phản hồi cho khách hàng..."></textarea>
+                        <span asp-validation-for="PhanHoiMoi" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send me-1"></i> Gửi phản hồi
+                        </button>
+                        <a asp-action="ContactList" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Quay lại
+                        </a>
+                    </div>
+                </form>
+                
+                @if (!string.IsNullOrEmpty(Model.PhanHoiAdmin))
+                {
+                    <hr />
+                    <div class="mt-3">
+                        <label class="form-label fw-bold">Phản hồi hiện tại:</label>
+                        <div class="contact-response">
+                            @Html.Raw(Model.PhanHoiAdmin.Replace("\n", "<br>"))
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 
