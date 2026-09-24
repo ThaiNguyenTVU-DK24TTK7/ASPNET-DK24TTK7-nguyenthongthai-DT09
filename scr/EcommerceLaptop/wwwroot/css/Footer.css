@@ -1,0 +1,149 @@
+footer {
+    background: #0e7ff0;
+    color: #ffffff;
+    padding: 3rem 2rem 1rem;
+}
+
+.footer-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 2rem;
+}
+
+.footer-section h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #ffffff;
+}
+
+.footer-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.subscribe-section p {
+    color: #666;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.email-subscribe {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+    .email-subscribe input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px 0 0 4px;
+        outline: none;
+        font-size: 0.9rem;
+    }
+
+    .email-subscribe button {
+        background: #083b68;
+        color: white;
+        border: none;
+        padding: 0.75rem 1rem;
+        border-radius: 0 4px 4px 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+    .footer-links li {
+        margin-bottom: 0.75rem;
+    }
+
+    .footer-links a {
+        color: #dbeafe;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.3s;
+    }
+
+        .footer-links a:hover {
+            color: #ffffff;
+        }
+
+.app-section {
+    text-align: center;
+}
+
+.qr-code {
+    width: 80px;
+    height: 80px;
+    background: #ffffff;
+    margin: 0 auto 1rem;
+    border-radius: 8px;
+}
+
+.app-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.app-button {
+    background: #083b68;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.social-icons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+    .social-icons a {
+        color: #dbeafe;
+        font-size: 1.2rem;
+        transition: color 0.3s;
+    }
+
+        .social-icons a:hover {
+            color: #ffffff;
+        }
+
+.footer-bottom {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(219, 234, 254, 0.35);
+    color: #dbeafe;
+    font-size: 0.9rem;
+}
+@media (max-width: 768px) {
+    .footer-main {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .app-buttons {
+        flex-direction: row;
+        justify-content: center;
+    }
+}
