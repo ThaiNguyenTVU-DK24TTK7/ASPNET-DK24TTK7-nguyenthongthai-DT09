@@ -17,3 +17,12 @@ Thư mục lưu báo cáo tiến độ thực hiện dự án theo từng tuần
 - Phân tích các đối tượng dữ liệu chính như sản phẩm, danh mục, người dùng, giỏ hàng và đơn hàng.
 - Thiết kế cơ sở dữ liệu ban đầu và cấu hình kết nối SQL Server bằng Entity Framework Core.
 - Dựng cấu trúc thư mục, model, controller và các giao diện cơ bản cho hệ thống.
+
+## Tuần 3 (21/09/2026 - 27/09/2026)
+
+- Hoàn thiện các chức năng chính của website bán laptop theo mô hình ASP.NET Core MVC.
+- Xây dựng các luồng quản lý sản phẩm, danh mục, tài khoản, giỏ hàng, yêu thích và đơn hàng.
+- Phát triển chức năng đặt hàng, thanh toán, xem lịch sử đơn hàng và cập nhật trạng thái đơn hàng.
+- Bổ sung chức năng đánh giá sản phẩm, liên hệ và các chức năng hỗ trợ người dùng.
+- Hoàn thiện giao diện trang chủ, danh sách và chi tiết sản phẩm, khu vực quản trị cùng các biểu mẫu tương tác.
+- Bổ sung hình ảnh, CSS, JavaScript và dữ liệu mẫu để kiểm tra giao diện và các chức năng của hệ thống.
