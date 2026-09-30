@@ -20,9 +20,23 @@ Thư mục lưu báo cáo tiến độ thực hiện dự án theo từng tuần
 
 ## Tuần 3 (21/09/2026 - 27/09/2026)
 
-- Hoàn thiện các chức năng chính của website bán laptop theo mô hình ASP.NET Core MVC.
-- Xây dựng các luồng quản lý sản phẩm, danh mục, tài khoản, giỏ hàng, yêu thích và đơn hàng.
-- Phát triển chức năng đặt hàng, thanh toán, xem lịch sử đơn hàng và cập nhật trạng thái đơn hàng.
-- Bổ sung chức năng đánh giá sản phẩm, liên hệ và các chức năng hỗ trợ người dùng.
-- Hoàn thiện giao diện trang chủ, danh sách và chi tiết sản phẩm, khu vực quản trị cùng các biểu mẫu tương tác.
-- Bổ sung hình ảnh, CSS, JavaScript và dữ liệu mẫu để kiểm tra giao diện và các chức năng của hệ thống.
+- Tóm tắt các chức năng code chính đã triển khai theo nội dung nghiên cứu và phân tích của tuần 1.
+- Xây dựng cấu trúc MVC cơ bản cho hệ thống: model, controller, view, routing và layout chung.
+- Thiết kế và triển khai giao diện trang chủ, danh mục sản phẩm, chi tiết sản phẩm và các trang tài khoản cơ bản.
+- Thêm các controller chính như HomeController, SanPhamController, AccountController, ContactController và các view tương ứng.
+- Bổ sung CSS, hình ảnh và JavaScript để hiển thị giao diện thân thiện, responsive và hỗ trợ tương tác người dùng.
+- Tạo dữ liệu mẫu và cấu hình route/URL để kiểm tra luồng hiển thị sản phẩm, tìm kiếm, lọc danh mục và xem chi tiết sản phẩm.
+- Chuẩn bị nền tảng cho các chức năng tuần sau như giỏ hàng, yêu thích, thanh toán, quản trị và đơn hàng.
+
+## Tuần 4 (28/09/2026 - 04/10/2026)
+
+- Tóm tắt các chức năng code chính đã triển khai theo nội dung phân tích và thiết kế của tuần 2.
+- Xây dựng và hoàn thiện các module chức năng chính của website bán laptop: quản lý sản phẩm, giỏ hàng, yêu thích, thanh toán, tài khoản và đơn hàng.
+- Triển khai controller và view cho GioHang, YeuThich, ThanhToan, Account, Admin và SanPham để xử lý luồng mua hàng và quản trị.
+- Tạo các model dữ liệu quan trọng như SanPham, DanhMuc, NguoiDung, DonHang, ChiTietDonHang, DanhGia, Banner, PhieuNhap và các model hỗ trợ khác.
+- Thiết lập Entity Framework Core với ApplicationDbContext và cấu hình database để lưu trữ thông tin người dùng, sản phẩm, đơn hàng và quản lý kho.
+- Hoàn thiện chức năng admin: quản lý danh mục, sản phẩm, người dùng, đơn hàng, liên hệ, banner và phiếu nhập.
+- Xây dựng các giao diện quản trị, báo cáo đơn hàng, lịch sử đặt hàng, trạng thái đơn hàng và thao tác cập nhật dữ liệu.
+- Bổ sung chức năng liên hệ, đánh giá sản phẩm, lưu giỏ hàng, thanh toán MoMo, xem đơn đặt hàng và xử lý trạng thái thanh toán thành công/thất bại.
+- Nâng cấp giao diện bằng CSS và JS tùy chỉnh cho từng module như Home, Sanpham, GioHang, Contact, AdminDashboard và OrderHistory.
+- Tạo dữ liệu hình ảnh sản phẩm, banner và thư viện Bootstrap để làm nền tảng hoàn thiện UI/UX của dự án.
