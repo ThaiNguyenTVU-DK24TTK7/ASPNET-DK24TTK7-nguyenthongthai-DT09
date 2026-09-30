@@ -1,0 +1,345 @@
+@model Ecommerce.ViewModels.AdminAddProductViewModel
+@{
+    ViewData["Title"] = "Thêm Sản Phẩm Mới";
+    Layout = "_AdminLayout";
+}
+
+@section Styles {
+    <style>
+        .add-product-container {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+            padding: 0 28px 24px;
+            margin-top: 32px;
+        }
+
+        .add-product-container > .card {
+            border: 0;
+            box-shadow: none;
+        }
+
+        .add-product-container .card-header {
+            background: transparent;
+            border-bottom: 1px solid #edf0f2;
+            padding: 22px 0;
+        }
+
+        .add-product-container .card-body {
+            padding: 28px 0 0;
+        }
+
+        .add-product-container .form-label {
+            font-weight: 600;
+        }
+
+        .add-product-container .variant-row {
+            display: grid;
+            grid-template-columns: minmax(100px, 1.1fr) minmax(100px, 1.1fr) minmax(80px, .8fr) minmax(100px, 1fr) minmax(100px, 1fr) 42px;
+            gap: 12px;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .add-product-container .variant-row > [class*="col-"] {
+            width: auto;
+            max-width: none;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .add-product-container .variant-delete-button {
+            height: 38px;
+            white-space: nowrap;
+            align-self: end;
+        }
+
+        .container > .row {
+            width: 100%;
+        }
+
+        @@media (max-width: 900px) {
+            .add-product-container .variant-row {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+    </style>
+}
+
+<div class="container d-flex justify-content-center">
+    <div class="row">
+        <div class="col-12">
+            <div class="card add-product-container w-100">
+                <div class="card-header">
+                    <h4 class="card-title">Thêm Sản Phẩm Mới</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddProduct" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="All" class="text-danger"></div>
+                        <div class="row">
+                            <div class="col-md-7">
+                                <div class="form-group mb-3">
+                                    <label asp-for="ProductName" class="form-label">Tên sản phẩm *</label>
+                                    <input asp-for="ProductName" class="form-control" placeholder="Nhập tên sản phẩm">
+                                    <span asp-validation-for="ProductName" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="Description" class="form-label">Mô tả sản phẩm *</label>
+                                    <textarea asp-for="Description" class="form-control" rows="4" placeholder="Nhập mô tả chi tiết về sản phẩm"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="CategoryId" class="form-label">Danh mục *</label>
+                                            <select asp-for="CategoryId" class="form-select">
+                                                <option value="">Chọn danh mục</option>
+                                                @foreach (var category in ViewBag.Categories)
+                                                {
+                                                    <option value="@category.Id">@category.Ten</option>
+                                                }
+                                            </select>
+                                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="Material" class="form-label">Chất liệu *</label>
+                                            <input asp-for="Material" class="form-control" placeholder="Ví dụ: Cotton, Polyester...">
+                                            <span asp-validation-for="Material" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="Brand" class="form-label">Thương hiệu *</label>
+                                    <input asp-for="Brand" class="form-control" placeholder="Ví dụ: ASUS, Lenovo, HP...">
+                                    <span asp-validation-for="Brand" class="text-danger"></span>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="RegularPrice" class="form-label">Giá gốc *</label>
+                                            <div class="input-group">
+                                                <input asp-for="RegularPrice" class="form-control" type="number" step="0.01" placeholder="0.00">
+                                                <span class="input-group-text">VNĐ</span>
+                                            </div>
+                                            <span asp-validation-for="RegularPrice" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="SalePrice" class="form-label">Giá khuyến mãi</label>
+                                            <div class="input-group">
+                                                <input asp-for="SalePrice" class="form-control" type="number" step="0.01" placeholder="0.00">
+                                                <span class="input-group-text">VNĐ</span>
+                                            </div>
+                                            <span asp-validation-for="SalePrice" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-5">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Hình ảnh sản phẩm</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">Chọn ảnh sản phẩm</label>
+                                            <input asp-for="ProductImages" class="form-control" multiple accept="image/*">
+                                            <small class="form-text text-muted">Có thể chọn nhiều ảnh. Ảnh đầu tiên sẽ là ảnh chính.</small>
+                                        </div>
+                                        
+                                        <div id="imagePreview" class="mt-3">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h6 class="mb-0">Kích thước và Số lượng</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Template kích thước:</label>
+                                        <select id="sizeTemplate" class="form-select" onchange="loadSizeTemplate()">
+                                            <option value="custom">Tùy chỉnh</option>
+                                            <option value="clothing">Quần áo (S, M, L, XL, XXL)</option>
+                                            <option value="shoes">Giày dép (37-44)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">&nbsp;</label>
+                                        <div>
+                                            <button type="button" class="btn btn-success btn-sm" onclick="addNewSize()">
+                                                <i class="fas fa-plus"></i> Thêm kích thước
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="sizesContainer">
+                                </div>
+
+                                <div id="sizeItemTemplate" style="display: none;">
+                                    <div class="row mb-3 size-item variant-row">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Kích thước:</label>
+                                            <input type="text" class="form-control size-input" placeholder="Nhập kích thước">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Màu sắc :</label>
+                                            <input type="text" class="form-control color-input" placeholder="Màu sắc">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Số lượng:</label>
+                                            <input type="number" class="form-control quantity-input" min="0" step="1" value="0">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Giá gốc:</label>
+                                            <input type="number" class="form-control regular-price-input" min="0" step="0.01" placeholder="Giá mặc định">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Giá giảm:</label>
+                                            <input type="number" class="form-control sale-price-input" min="0" step="0.01" placeholder="Không bắt buộc">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">&nbsp;</label>
+                                            <div>
+                                                <button type="button" class="btn btn-sm btn-outline-danger variant-delete-button" onclick="removeSize(this)" title="Xóa kích thước">
+                                                    <i class="bi bi-trash"></i> Xóa
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Lưu sản phẩm
+                                </button>
+                                <a asp-action="ProductList" class="btn btn-secondary ms-2">
+                                    <i class="fas fa-arrow-left me-2"></i>Quay lại
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        let sizeIndex = 0;
+        const sizeTemplates = {
+            'clothing': ['S', 'M', 'L', 'XL', 'XXL'],
+            'shoes': ['37', '38', '39', '40', '41', '42', '43', '44'],
+            'electronics': ['256GB', '512GB', '1TB', '2TB'],
+            'custom': []
+        };
+        function loadSizeTemplate() {
+            const template = document.getElementById('sizeTemplate').value;
+            const container = document.getElementById('sizesContainer');
+            container.innerHTML = '';
+            sizeIndex = 0;
+            if (template !== 'custom' && sizeTemplates[template]) {
+                sizeTemplates[template].forEach(size => {
+                    addSizeItem(size);
+                });
+            } else {
+                addSizeItem('');
+            }
+        }
+        function addNewSize() {
+            addSizeItem('');
+        }
+        function addSizeItem(sizeValue = '') {
+            const template = document.getElementById('sizeItemTemplate');
+            const container = document.getElementById('sizesContainer');
+            const newItem = template.cloneNode(true);
+            newItem.style.display = 'block';
+            newItem.id = '';
+            const sizeInput = newItem.querySelector('.size-input');
+            const colorInput = newItem.querySelector('.color-input');
+            const quantityInput = newItem.querySelector('.quantity-input');
+            const regularPriceInput = newItem.querySelector('.regular-price-input');
+            const salePriceInput = newItem.querySelector('.sale-price-input');
+            
+            sizeInput.name = `Sizes[${sizeIndex}].Size`;
+            sizeInput.value = sizeValue;
+            colorInput.name = `Sizes[${sizeIndex}].Color`;
+            quantityInput.name = `Sizes[${sizeIndex}].StockQuantity`;
+            regularPriceInput.name = `Sizes[${sizeIndex}].RegularPrice`;
+            salePriceInput.name = `Sizes[${sizeIndex}].SalePrice`;
+            
+            container.appendChild(newItem);
+            sizeIndex++;
+        }
+        function removeSize(button) {
+            const item = button.closest('.size-item');
+            item.remove();
+            updateSizeIndexes();
+        }
+        function updateSizeIndexes() {
+            const items = document.querySelectorAll('#sizesContainer .size-item');
+            items.forEach((item, index) => {
+                const sizeInput = item.querySelector('.size-input');
+                const colorInput = item.querySelector('.color-input');
+                const quantityInput = item.querySelector('.quantity-input');
+                const regularPriceInput = item.querySelector('.regular-price-input');
+                const salePriceInput = item.querySelector('.sale-price-input');
+                
+                sizeInput.name = `Sizes[${index}].Size`;
+                colorInput.name = `Sizes[${index}].Color`;
+                quantityInput.name = `Sizes[${index}].StockQuantity`;
+                regularPriceInput.name = `Sizes[${index}].RegularPrice`;
+                salePriceInput.name = `Sizes[${index}].SalePrice`;
+            });
+            
+            sizeIndex = items.length;
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSizeTemplate();
+        });
+        document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            
+            for (let i = 0; i < e.target.files.length; i++) {
+                const file = e.target.files[i];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.width = '100px';
+                        img.style.height = '100px';
+                        img.style.objectFit = 'cover';
+                        img.style.margin = '5px';
+                        img.style.border = '1px solid #ddd';
+                        img.style.borderRadius = '5px';
+                        preview.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+    </script>
+} 

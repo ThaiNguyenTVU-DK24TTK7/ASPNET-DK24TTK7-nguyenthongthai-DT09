@@ -1,0 +1,220 @@
+.contact-list-table {
+    font-size: 0.9rem;
+}
+
+.contact-list-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    border-top: none;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.contact-list-table tr {
+    transition: all 0.2s ease;
+}
+
+.contact-list-table tr:hover {
+    background: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.contact-detail-card {
+    border: 1px solid #dfe5eb;
+    box-shadow: 0 8px 24px rgba(25, 42, 57, 0.06);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.contact-page-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0.5rem 0 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #dfe5eb;
+}
+
+.contact-page-heading h3 {
+    margin: 0;
+    color: #1e2d3b;
+    font-size: 1.55rem;
+    font-weight: 700;
+}
+
+.contact-breadcrumb,
+.contact-section-kicker {
+    color: #71808d;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+}
+
+.contact-breadcrumb { margin-bottom: 0.4rem; }
+
+.contact-back-link {
+    border-color: #b8c3cc;
+    color: #34495a;
+    white-space: nowrap;
+}
+
+.contact-card-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1.2rem 1.4rem;
+    background: #f4f6f8;
+    border-bottom: 1px solid #dfe5eb;
+    color: #1e2d3b;
+}
+
+.contact-card-heading h5 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.contact-heading-icon {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #b9c8d4;
+    border-radius: 50%;
+    color: #28617c;
+    background: #fff;
+}
+
+.contact-message {
+    background: #fbfcfd;
+    border: 1px solid #dfe5eb;
+    border-left: 3px solid #28617c;
+    padding: 1.1rem 1.2rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+    line-height: 1.65;
+}
+
+.contact-response {
+    background: #e8f5e8;
+    border-left: 4px solid #28a745;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.status-new {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-read {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-replied {
+    background: #d4edda;
+    color: #155724;
+}
+
+.contact-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.contact-actions .btn {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.contact-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.contact-info-item {
+    background: transparent;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #edf0f2;
+}
+
+.contact-info-item label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.contact-info-item p {
+    margin: 0;
+    font-weight: 500;
+    color: #212529;
+}
+
+.response-form {
+    background: #fff;
+    padding: 1.4rem;
+}
+
+.response-form textarea {
+    min-height: 180px;
+    border: 1px solid #cbd5dc;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+.response-form textarea:focus {
+    border-color: #28617c;
+    box-shadow: 0 0 0 0.15rem rgba(40, 97, 124, 0.12);
+}
+
+.response-card .btn-primary {
+    background: #28617c;
+    border-color: #28617c;
+}
+
+.response-card .btn-primary:hover {
+    background: #1e4d63;
+    border-color: #1e4d63;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+@media (max-width: 768px) {
+    .contact-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .contact-actions {
+        flex-direction: column;
+    }
+    
+    .contact-actions .btn {
+        width: 100%;
+    }
+} 

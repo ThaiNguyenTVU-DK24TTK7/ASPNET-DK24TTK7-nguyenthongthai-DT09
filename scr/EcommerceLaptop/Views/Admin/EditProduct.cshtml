@@ -1,0 +1,466 @@
+@model Ecommerce.ViewModels.AdminEditProductViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa sản phẩm";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section Styles {
+    <style>
+        .edit-product-container {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+            padding: 32px 28px 24px 28px;
+            margin-top: 32px;
+        }
+        .edit-product-label {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .edit-product-img-main {
+            max-height: 220px;
+            border-radius: 10px;
+            border: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+        .edit-product-gallery img {
+            width: 64px;
+            height: 64px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .edit-product-upload {
+            margin-top: 10px;
+        }
+        .edit-product-btn {
+            font-weight: 600;
+            padding: 10px 32px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+        }
+        .edit-product-tags-hint {
+            font-size: 0.95rem;
+            color: #888;
+        }
+        .gallery-thumbnail:hover {
+            opacity: 0.8;
+            border-color: #007bff !important;
+        }
+        .main-image {
+            border: 2px solid #007bff !important;
+        }
+        .main-image-badge {
+            z-index: 10;
+        }
+
+        .edit-product-container .variant-row {
+            display: grid;
+            grid-template-columns: minmax(90px, 1fr) minmax(90px, 1fr) minmax(70px, .75fr) minmax(95px, 1fr) minmax(95px, 1fr) minmax(130px, 1.25fr) 42px;
+            gap: 10px;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .edit-product-container .variant-row > [class*="col-"] {
+            width: auto;
+            max-width: none;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .edit-product-container .color-image-edit-input {
+            min-width: 0;
+            padding-left: .35rem;
+            padding-right: .35rem;
+        }
+
+        .edit-product-container .variant-delete-button {
+            height: 38px;
+            white-space: nowrap;
+            align-self: end;
+        }
+
+        @@media (max-width: 1100px) {
+            .edit-product-container .variant-row {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+    </style>
+}
+<div class="container d-flex justify-content-center">
+    <div class="edit-product-container w-100">
+        <h3 class="mb-4"><i class="bi bi-pencil-square me-2"></i>Chỉnh sửa sản phẩm</h3>
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+        }
+        <form method="post" enctype="multipart/form-data" asp-action="EditProduct" asp-controller="Admin" asp-route-id="@Model.ProductId">
+            @Html.AntiForgeryToken()
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="mb-3">
+                        <label class="edit-product-label">Tên sản phẩm</label>
+                        <input asp-for="ProductName" class="form-control form-control-lg" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="edit-product-label">Mô tả</label>
+                        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                    </div>
+                    <div class="mb-3 row d-none">
+                        <div class="col">
+                            <label class="edit-product-label">Giá gốc</label>
+                            <input asp-for="RegularPrice" class="form-control" />
+                        </div>
+                        <div class="col">
+                            <label class="edit-product-label">Giá giảm</label>
+                            <input asp-for="SalePrice" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col">
+                            <label class="edit-product-label">Danh mục</label>
+                            <select asp-for="CategoryId" class="form-select">
+                                @foreach (var category in ViewBag.Categories)
+                                {
+                                    <option value="@category.Id" selected="@(category.Id == Model.CategoryId)">@category.Ten</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label class="edit-product-label">Chất liệu</label>
+                            <input asp-for="Material" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="edit-product-label" asp-for="Brand">Thương hiệu</label>
+                        <input asp-for="Brand" class="form-control" placeholder="Ví dụ: ASUS, Lenovo, HP..." />
+                        <span asp-validation-for="Brand" class="text-danger"></span>
+                    </div>
+                    
+                </div>
+                <div class="col-md-5">
+                    <div class="mb-3">
+                        <label class="edit-product-label">Ảnh chính</label>
+                        @if (!string.IsNullOrEmpty(Model.MainImageUrl))
+                        {
+                            <img src="@Model.MainImageUrl" class="img-fluid rounded mb-2" alt="Ảnh chính" />
+                        }
+                        else
+                        {
+                            <div class="text-muted border rounded p-3 text-center">Chưa có ảnh chính</div>
+                        }
+                    </div>
+                    <div class="mb-3">
+                        <label class="edit-product-label">Thư viện ảnh</label>
+                        <div class="d-flex flex-wrap gallery-container">
+                            @if (Model.GalleryImages != null && Model.GalleryImages.Any())
+                            {
+                                @foreach (var img in Model.GalleryImages)
+                                {
+                                    <div class="gallery-item position-relative me-2 mb-2" data-image-id="@img.Id">
+                                        <img src="@img.Url" class="img-thumbnail gallery-thumbnail @(img.IsMain ? "main-image" : "")" 
+                                             style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;" 
+                                             title="@(img.IsMain ? "Ảnh chính" : "Click để chọn làm ảnh chính")" />
+                                        @if (img.IsMain)
+                                        {
+                                            <div class="main-image-badge position-absolute top-0 end-0 bg-primary text-white rounded-circle" 
+                                                 style="width: 20px; height: 20px; font-size: 12px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-star-fill"></i>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted">Chưa có ảnh trong thư viện.</p>
+                            }
+                        </div>
+                    </div>
+                    <div class="mb-3 edit-product-upload">
+                        <label class="edit-product-label">Tải ảnh mới</label>
+                        <input type="file" name="newImages" id="newImagesInput" class="form-control" multiple />
+                        <div id="newImagePreview" class="mt-2 d-flex flex-wrap">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Kích thước và Số lượng</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <button type="button" class="btn btn-success btn-sm" onclick="addNewSizeEdit()">
+                                <i class="fas fa-plus"></i> Thêm kích thước
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="sizesEditContainer">
+                        @if (Model.Sizes != null && Model.Sizes.Any())
+                        {
+                            @for (int i = 0; i < Model.Sizes.Count; i++)
+                            {
+                                <div class="row mb-3 size-edit-item variant-row" data-index="@i">
+                                    <div class="col-md-2">
+                                        <label class="form-label">Kích thước:</label>
+                                        <input asp-for="Sizes[i].Size" class="form-control size-edit-input" placeholder="Nhập kích thước">
+                                        <input asp-for="Sizes[i].Id" type="hidden" />
+                                        <input asp-for="Sizes[i].IsDeleted" type="hidden" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Màu sắc:</label>
+                                        <input asp-for="Sizes[i].Color" class="form-control color-edit-input" placeholder="Màu sắc">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Số lượng:</label>
+                                        <input asp-for="Sizes[i].StockQuantity" class="form-control quantity-edit-input" type="number" min="0" step="1">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Giá gốc:</label>
+                                        <input name="Sizes[@i].RegularPrice" class="form-control regular-price-edit-input" type="number" min="0" step="1" value="@(Model.Sizes[i].RegularPrice is decimal regularPrice ? regularPrice.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) : "")">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Giá giảm:</label>
+                                        <input name="Sizes[@i].SalePrice" class="form-control sale-price-edit-input" type="number" min="0" step="1" value="@(Model.Sizes[i].SalePrice is decimal salePrice ? salePrice.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) : "")">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Ảnh màu:</label>
+                                        <input asp-for="Sizes[i].ColorImage" type="file" accept="image/*" class="form-control color-image-edit-input" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">&nbsp;</label>
+                                        <button type="button" class="btn btn-sm btn-outline-danger variant-delete-button" onclick="removeSizeEdit(this)" title="Xóa kích thước">
+                                            <i class="bi bi-trash"></i> Xóa
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <div id="sizeEditItemTemplate" style="display: none;">
+                        <div class="row mb-3 size-edit-item variant-row">
+                            <div class="col-md-2">
+                                <label class="form-label">Kích thước:</label>
+                                <input type="text" class="form-control size-edit-input" placeholder="Nhập kích thước">
+                                <input type="hidden" class="id-input" value="0" />
+                                <input type="hidden" class="deleted-input" value="false" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Màu sắc:</label>
+                                <input type="text" class="form-control color-edit-input" placeholder="Màu sắc">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Số lượng:</label>
+                                <input type="number" class="form-control quantity-edit-input" min="0" step="1" value="0">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Giá gốc:</label>
+                                <input type="number" class="form-control regular-price-edit-input" min="0" step="1">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Giá giảm:</label>
+                                <input type="number" class="form-control sale-price-edit-input" min="0" step="1">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Ảnh màu:</label>
+                                <input type="file" accept="image/*" class="form-control color-image-edit-input" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="button" class="btn btn-sm btn-outline-danger variant-delete-button" onclick="removeSizeEdit(this)" title="Xóa kích thước">
+                                    <i class="bi bi-trash"></i> Xóa
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary edit-product-btn mt-4"><i class="bi bi-save me-1"></i> Lưu thay đổi</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let sizeEditIndex = @(Model.Sizes?.Count ?? 0);
+        function addNewSizeEdit() {
+            const template = document.getElementById('sizeEditItemTemplate');
+            const container = document.getElementById('sizesEditContainer');
+            const newItem = template.cloneNode(true);
+            newItem.style.display = 'block';
+            newItem.id = '';
+            newItem.setAttribute('data-index', sizeEditIndex);
+            const sizeInput = newItem.querySelector('.size-edit-input');
+            const colorInput = newItem.querySelector('.color-edit-input');
+            const quantityInput = newItem.querySelector('.quantity-edit-input');
+            const regularPriceInput = newItem.querySelector('.regular-price-edit-input');
+            const salePriceInput = newItem.querySelector('.sale-price-edit-input');
+            const imageInput = newItem.querySelector('.color-image-edit-input');
+            const idInput = newItem.querySelector('.id-input');
+            const deletedInput = newItem.querySelector('.deleted-input');
+            
+            sizeInput.name = `Sizes[${sizeEditIndex}].Size`;
+            colorInput.name = `Sizes[${sizeEditIndex}].Color`;
+            quantityInput.name = `Sizes[${sizeEditIndex}].StockQuantity`;
+            regularPriceInput.name = `Sizes[${sizeEditIndex}].RegularPrice`;
+            salePriceInput.name = `Sizes[${sizeEditIndex}].SalePrice`;
+            imageInput.name = `Sizes[${sizeEditIndex}].ColorImage`;
+            idInput.name = `Sizes[${sizeEditIndex}].Id`;
+            deletedInput.name = `Sizes[${sizeEditIndex}].IsDeleted`;
+            
+            container.appendChild(newItem);
+            sizeEditIndex++;
+        }
+        function removeSizeEdit(button) {
+            const item = button.closest('.size-edit-item');
+            const idInput = item.querySelector('input[name*=".Id"]');
+            const deletedInput = item.querySelector('input[name*=".IsDeleted"]');
+            
+            if (idInput && idInput.value && idInput.value !== '0') {
+                deletedInput.value = 'true';
+                item.style.display = 'none';
+            } else {
+                item.remove();
+                updateSizeEditIndexes();
+            }
+        }
+        function updateSizeEditIndexes() {
+            const items = document.querySelectorAll('#sizesEditContainer .size-edit-item[style*="block"], #sizesEditContainer .size-edit-item:not([style])');
+            let index = 0;
+            
+            items.forEach((item) => {
+                if (item.style.display !== 'none') {
+                    const sizeInput = item.querySelector('.size-edit-input');
+                    const colorInput = item.querySelector('.color-edit-input');
+                    const quantityInput = item.querySelector('.quantity-edit-input');
+                    const regularPriceInput = item.querySelector('.regular-price-edit-input');
+                    const salePriceInput = item.querySelector('.sale-price-edit-input');
+                    const imageInput = item.querySelector('.color-image-edit-input');
+                    const idInput = item.querySelector('input[name*=".Id"]');
+                    const deletedInput = item.querySelector('input[name*=".IsDeleted"]');
+                    
+                    if (sizeInput) sizeInput.name = `Sizes[${index}].Size`;
+                    if (colorInput) colorInput.name = `Sizes[${index}].Color`;
+                    if (quantityInput) quantityInput.name = `Sizes[${index}].StockQuantity`;
+                    if (regularPriceInput) regularPriceInput.name = `Sizes[${index}].RegularPrice`;
+                    if (salePriceInput) salePriceInput.name = `Sizes[${index}].SalePrice`;
+                    if (imageInput) imageInput.name = `Sizes[${index}].ColorImage`;
+                    if (idInput) idInput.name = `Sizes[${index}].Id`;
+                    if (deletedInput) deletedInput.name = `Sizes[${index}].IsDeleted`;
+                    
+                    item.setAttribute('data-index', index);
+                    index++;
+                }
+            });
+            
+            sizeEditIndex = index;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const newImagesInput = document.getElementById('newImagesInput');
+            const newImagePreview = document.getElementById('newImagePreview');
+
+            if (newImagesInput) {
+                newImagesInput.addEventListener('change', function (e) {
+                    newImagePreview.innerHTML = '';
+
+                    const files = e.target.files;
+                    if (!files || files.length === 0) {
+                        return;
+                    }
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        if (file.type.startsWith('image/')) {
+                            const reader = new FileReader();
+                            
+                            reader.onload = function (event) {
+                                const img = document.createElement('img');
+                                img.src = event.target.result;
+                                img.style.width = '80px';
+                                img.style.height = '80px';
+                                img.style.objectFit = 'cover';
+                                img.style.marginRight = '8px';
+                                img.style.marginBottom = '8px';
+                                img.classList.add('img-thumbnail');
+                                newImagePreview.appendChild(img);
+                            }
+
+                            reader.readAsDataURL(file);
+                        }
+                    }
+                });
+            }
+            const galleryItems = document.querySelectorAll('.gallery-item');
+            galleryItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const imageId = this.getAttribute('data-image-id');
+                    const productId = @Model.ProductId;
+                    fetch('/Admin/SetMainImage', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            productId: productId,
+                            imageId: parseInt(imageId)
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.querySelectorAll('.main-image').forEach(img => {
+                                img.classList.remove('main-image');
+                            });
+                            document.querySelectorAll('.main-image-badge').forEach(badge => {
+                                badge.remove();
+                            });
+                            const clickedImg = this.querySelector('.gallery-thumbnail');
+                            clickedImg.classList.add('main-image');
+                            const badge = document.createElement('div');
+                            badge.className = 'main-image-badge position-absolute top-0 end-0 bg-primary text-white rounded-circle';
+                            badge.style.cssText = 'width: 20px; height: 20px; font-size: 12px; display: flex; align-items: center; justify-content: center; z-index: 10;';
+                            badge.innerHTML = '<i class="bi bi-star-fill"></i>';
+                            this.appendChild(badge);
+                            const mainImageContainer = document.querySelector('.mb-3 img[alt="Ảnh chính"]');
+                            if (mainImageContainer) {
+                                mainImageContainer.src = clickedImg.src;
+                            }
+                            showNotification(data.message, 'success');
+                        } else {
+                            showNotification('Có lỗi xảy ra khi cập nhật ảnh chính', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Có lỗi xảy ra khi cập nhật ảnh chính', 'error');
+                    });
+                });
+            });
+            function showNotification(message, type) {
+                const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+                const notification = document.createElement('div');
+                notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+                notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+                notification.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(notification);
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 3000);
+            }
+        });
+    </script>
+} 

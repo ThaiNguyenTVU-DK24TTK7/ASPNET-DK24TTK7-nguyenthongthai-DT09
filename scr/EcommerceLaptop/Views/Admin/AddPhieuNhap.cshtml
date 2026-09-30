@@ -1,0 +1,443 @@
+@model Ecommerce.ViewModels.AddPhieuNhapViewModel
+@{
+    ViewData["Title"] = "Thêm Phiếu Nhập";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Thêm Phiếu Nhập Mới</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddPhieuNhap" method="post" id="phieuNhapForm">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="All" class="text-danger"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Thông Tin Phiếu Nhập</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="MaPhieuNhap" class="form-label">Mã phiếu nhập *</label>
+                                            <input asp-for="MaPhieuNhap" class="form-control" readonly>
+                                            <span asp-validation-for="MaPhieuNhap" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label asp-for="NgayNhap" class="form-label">Ngày nhập *</label>
+                                            <input asp-for="NgayNhap" class="form-control" type="date" value="@Model.NgayNhap.ToString("yyyy-MM-dd")">
+                                            <span asp-validation-for="NgayNhap" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label asp-for="NhaCungCap" class="form-label">Nhà cung cấp</label>
+                                            <input asp-for="NhaCungCap" class="form-control" placeholder="Tên nhà cung cấp">
+                                            <span asp-validation-for="NhaCungCap" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label asp-for="GhiChu" class="form-label">Ghi chú</label>
+                                            <textarea asp-for="GhiChu" class="form-control" rows="3" placeholder="Ghi chú về phiếu nhập"></textarea>
+                                            <span asp-validation-for="GhiChu" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Chọn Sản Phẩm</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="DanhMucId" class="form-label">Danh mục *</label>
+                                            <select asp-for="DanhMucId" class="form-select" id="categorySelect" onchange="loadProductsByCategory()">
+                                                <option value="">Chọn danh mục</option>
+                                                @foreach (var category in ViewBag.Categories)
+                                                {
+                                                    <option value="@category.Id">@category.Ten</option>
+                                                }
+                                            </select>
+                                            <span asp-validation-for="DanhMucId" class="text-danger"></span>
+                                        </div>
+
+                                        <div id="productsContainer" style="display: none;">
+                                            <h6>Sản phẩm trong danh mục:</h6>
+                                            <div id="productsList">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h6 class="mb-0">Chi Tiết Phiếu Nhập</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="chiTietContainer">
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-md-8"></div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h6>Tổng giá trị: <span id="tongGiaTri" class="text-success">0 VNĐ</span></h6>
+                                                <h6>Tổng sản phẩm: <span id="tongSanPham" class="text-info">0</span></h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    <i class="bi bi-save me-2"></i>Lưu Phiếu Nhập
+                                </button>
+                                <a asp-action="PhieuNhapList" class="btn btn-secondary ms-2">
+                                    <i class="bi bi-arrow-left me-2"></i>Quay Lại
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            $('#phieuNhapForm').on('submit', function(e) {
+                e.preventDefault();
+                if (validateForm()) {
+                    this.submit();
+                }
+            });
+            $('#submitBtn').on('click', function(e) {
+                e.preventDefault();
+                $('#phieuNhapForm').trigger('submit');
+            });
+            $(document).on('change', 'input, select', function() {
+                checkFormValidity();
+            });
+            checkFormValidity();
+        });
+
+        function checkFormValidity() {
+            const items = document.querySelectorAll('.chi-tiet-item');
+            const submitBtn = document.getElementById('submitBtn');
+            const ngayNhap = document.querySelector('input[name="NgayNhap"]');
+            let isValid = true;
+
+            if (items.length === 0 || !ngayNhap.value) {
+                isValid = false;
+            } else {
+                items.forEach(item => {
+                    const sizeRows = item.querySelectorAll('.size-row');
+                    sizeRows.forEach(row => {
+                        const kichThuoc = row.querySelector('select[name*="KichThuoc"]');
+                        const soLuong = row.querySelector('input[name*="SoLuongNhap"]');
+                        const giaNhap = row.querySelector('input[name*="GiaNhap"]');
+                        
+                        if (!kichThuoc.value || 
+                            !soLuong.value || parseInt(soLuong.value) <= 0 ||
+                            !giaNhap.value || parseInt(giaNhap.value) <= 0) {
+                            isValid = false;
+                        }
+                    });
+                });
+            }
+
+            submitBtn.disabled = !isValid;
+        }
+        let currentProducts = [];
+        let chiTietIndex = 0;
+        async function loadProductsByCategory() {
+            const categoryId = document.getElementById('categorySelect').value;
+            const productsContainer = document.getElementById('productsContainer');
+            const productsList = document.getElementById('productsList');
+
+            if (!categoryId) {
+                productsContainer.style.display = 'none';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/Admin/GetProductsByCategory?categoryId=${categoryId}`);
+                const products = await response.json();
+                currentProducts = products;
+
+                productsList.innerHTML = '';
+                
+                if (products.length > 0) {
+                    products.forEach(product => {
+                        const productDiv = document.createElement('div');
+                        productDiv.className = 'border rounded p-3 mb-3 product-item';
+                        productDiv.innerHTML = `
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    <img src="/${product.anhDaiDien}" alt="${product.ten}" class="img-fluid rounded" style="max-height: 60px;">
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="mb-1">${product.ten}</h6>
+                                    <small class="text-muted">Giá: ${product.gia.toLocaleString()} VNĐ</small>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button type="button" class="btn btn-sm btn-success" onclick="addProductToPhieuNhap(${product.id})">
+                                        <i class="bi bi-plus"></i> Thêm
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        productsList.appendChild(productDiv);
+                    });
+                    productsContainer.style.display = 'block';
+                } else {
+                    productsList.innerHTML = '<p class="text-muted">Không có sản phẩm trong danh mục này.</p>';
+                    productsContainer.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+                alert('Có lỗi xảy ra khi tải sản phẩm');
+            }
+        }
+        function addProductToPhieuNhap(productId) {
+            const product = currentProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            const container = document.getElementById('chiTietContainer');
+            const chiTietDiv = document.createElement('div');
+            chiTietDiv.className = 'row mb-3 chi-tiet-item border rounded p-3';
+            chiTietDiv.setAttribute('data-index', chiTietIndex);
+
+            chiTietDiv.innerHTML = `
+                <div class="col-12">
+                    <div class="product-header d-flex align-items-center mb-3">
+                        <img src="/${product.anhDaiDien}" alt="${product.ten}" class="img-fluid rounded me-3" style="max-height: 60px; max-width: 60px;">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">${product.ten}</h6>
+                            <small class="text-muted">Giá bán: ${product.gia.toLocaleString()} VNĐ</small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-success me-2" onclick="addSizeToProduct(${chiTietIndex})">
+                            <i class="bi bi-plus"></i> Thêm Size
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removeChiTiet(this)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <input type="hidden" name="ChiTietPhieuNhaps[${chiTietIndex}].SanPhamId" value="${product.id}">
+                    <div class="sizes-container" data-product-index="${chiTietIndex}">
+                        ${createSizeRow(chiTietIndex, 0, product)}
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(chiTietDiv);
+            chiTietIndex++;
+            updateTongGiaTri();
+            updateSubmitButton();
+        }
+        function updateThanhTien(index) {
+            const item = document.querySelector(`[data-index="${index}"]`);
+            const soLuong = item.querySelector('input[name*="SoLuongNhap"]').value || 0;
+            const giaNhap = item.querySelector('input[name*="GiaNhap"]').value || 0;
+            const thanhTien = soLuong * giaNhap;
+            
+            item.querySelector('.thanh-tien').textContent = thanhTien.toLocaleString();
+            updateTongGiaTri();
+        }
+        function removeChiTiet(button) {
+            button.closest('.chi-tiet-item').remove();
+            updateTotals();
+            updateSubmitButton();
+        }
+        function createSizeRow(productIndex, sizeIndex, product) {
+            return `
+                <div class="size-row row mb-2 border rounded p-2" data-size-index="${sizeIndex}">
+                    <div class="col-md-3">
+                        <label class="form-label">Kích thước</label>
+                        <select name="ChiTietPhieuNhaps[${productIndex}].Sizes[${sizeIndex}].KichThuoc" class="form-select form-select-sm">
+                            <option value="">Chọn size</option>
+                            ${product.sizes.map(size => `<option value="${size.kichThuoc || ''}">${size.kichThuoc || 'N/A'} ${size.mauSac ? '- ' + size.mauSac : ''} (Tồn: ${size.tonKhoHienTai})</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Màu sắc</label>
+                        <input type="text" name="ChiTietPhieuNhaps[${productIndex}].Sizes[${sizeIndex}].MauSac" class="form-control form-control-sm" placeholder="Màu sắc">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Số lượng *</label>
+                        <input type="number" name="ChiTietPhieuNhaps[${productIndex}].Sizes[${sizeIndex}].SoLuongNhap" class="form-control form-control-sm" min="1" value="1" onchange="updateProductTotal(${productIndex})" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Giá nhập *</label>
+                        <input type="number" name="ChiTietPhieuNhaps[${productIndex}].Sizes[${sizeIndex}].GiaNhap" class="form-control form-control-sm" min="0" step="1000" value="${product.gia}" onchange="updateProductTotal(${productIndex})" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Thành tiền</label>
+                        <div class="form-control-plaintext">
+                            <span class="thanh-tien-size">${product.gia.toLocaleString()}</span> VNĐ
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">&nbsp;</label>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSizeRow(this, ${productIndex})">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        function addSizeToProduct(productIndex) {
+            const sizesContainer = document.querySelector(`[data-product-index="${productIndex}"]`);
+            const sizeRows = sizesContainer.querySelectorAll('.size-row');
+            const newSizeIndex = sizeRows.length;
+            
+            const product = currentProducts.find(p => p.id == document.querySelector(`input[name="ChiTietPhieuNhaps[${productIndex}].SanPhamId"]`).value);
+            
+            const newSizeRowHtml = createSizeRow(productIndex, newSizeIndex, product);
+            sizesContainer.insertAdjacentHTML('beforeend', newSizeRowHtml);
+        }
+        function removeSizeRow(button, productIndex) {
+            const sizeRow = button.closest('.size-row');
+            const sizesContainer = document.querySelector(`[data-product-index="${productIndex}"]`);
+            if (sizesContainer.querySelectorAll('.size-row').length <= 1) {
+                alert('Mỗi sản phẩm phải có ít nhất 1 kích thước!');
+                return;
+            }
+            
+            sizeRow.remove();
+            reindexSizeRows(productIndex);
+            updateProductTotal(productIndex);
+        }
+        function reindexSizeRows(productIndex) {
+            const sizesContainer = document.querySelector(`[data-product-index="${productIndex}"]`);
+            const sizeRows = sizesContainer.querySelectorAll('.size-row');
+            
+            sizeRows.forEach((row, index) => {
+                row.setAttribute('data-size-index', index);
+                const inputs = row.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    const name = input.getAttribute('name');
+                    if (name) {
+                        const newName = name.replace(/\[Sizes\]\[\d+\]/, `[Sizes][${index}]`);
+                        input.setAttribute('name', newName);
+                    }
+                });
+            });
+        }
+        function updateProductTotal(productIndex) {
+            const sizesContainer = document.querySelector(`[data-product-index="${productIndex}"]`);
+            const sizeRows = sizesContainer.querySelectorAll('.size-row');
+            
+            sizeRows.forEach(row => {
+                const soLuong = parseFloat(row.querySelector('input[name*="SoLuongNhap"]').value) || 0;
+                const giaNhap = parseFloat(row.querySelector('input[name*="GiaNhap"]').value) || 0;
+                const thanhTien = soLuong * giaNhap;
+                
+                row.querySelector('.thanh-tien-size').textContent = thanhTien.toLocaleString();
+            });
+            
+            updateTotals();
+        }
+        function updateThanhTien(productIndex) {
+            updateProductTotal(productIndex);
+        }
+        function updateTotals() {
+            let tongGiaTri = 0;
+            let tongSanPham = 0;
+
+            document.querySelectorAll('.chi-tiet-item').forEach(item => {
+                const sizesContainer = item.querySelector('.sizes-container');
+                if (sizesContainer) {
+                    const sizeRows = sizesContainer.querySelectorAll('.size-row');
+                    sizeRows.forEach(row => {
+                        const soLuong = parseFloat(row.querySelector('input[name*="SoLuongNhap"]').value) || 0;
+                        const giaNhap = parseFloat(row.querySelector('input[name*="GiaNhap"]').value) || 0;
+                        tongGiaTri += soLuong * giaNhap;
+                        tongSanPham += soLuong;
+                    });
+                }
+            });
+
+            document.getElementById('tongGiaTri').textContent = tongGiaTri.toLocaleString() + ' VNĐ';
+            document.getElementById('tongSanPham').textContent = tongSanPham;
+        }
+        function validateForm() {
+            const items = document.querySelectorAll('.chi-tiet-item');
+            const ngayNhap = document.querySelector('input[name="NgayNhap"]');
+            if (items.length === 0) {
+                showError('Vui lòng thêm ít nhất một sản phẩm');
+                return false;
+            }
+            if (!ngayNhap.value) {
+                showError('Vui lòng chọn ngày nhập');
+                ngayNhap.focus();
+                return false;
+            }
+            for (let i = 0; i < items.length; i++) {
+                const sizeRows = items[i].querySelectorAll('.size-row');
+                for (let j = 0; j < sizeRows.length; j++) {
+                    const row = sizeRows[j];
+                    const kichThuoc = row.querySelector('select[name*="KichThuoc"]');
+                    const soLuong = row.querySelector('input[name*="SoLuongNhap"]');
+                    const giaNhap = row.querySelector('input[name*="GiaNhap"]');
+
+                    if (!kichThuoc.value) {
+                        showError('Vui lòng chọn kích thước cho tất cả sản phẩm');
+                        kichThuoc.focus();
+                        return false;
+                    }
+
+                    if (!soLuong.value || parseInt(soLuong.value) <= 0) {
+                        showError('Số lượng nhập phải lớn hơn 0');
+                        soLuong.focus();
+                        return false;
+                    }
+
+                    if (!giaNhap.value || parseInt(giaNhap.value) <= 0) {
+                        showError('Giá nhập phải lớn hơn 0');
+                        giaNhap.focus();
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        function showError(message) {
+            alert(message);
+        }
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('submitBtn');
+            const items = document.querySelectorAll('.chi-tiet-item');
+            
+            submitBtn.disabled = false; // Mặc định enable nút
+            
+            if (items.length === 0) {
+                submitBtn.disabled = true;
+                return;
+            }
+        }
+    </script>
+}

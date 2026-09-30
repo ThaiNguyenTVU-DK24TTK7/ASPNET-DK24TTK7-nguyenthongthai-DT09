@@ -1,0 +1,714 @@
+@model Ecommerce.Models.SanPham
+@using System.Globalization
+@using System.Text.Json
+@using System.Text.RegularExpressions
+@using Ecommerce
+@using Ecommerce.Helpers
+@using Ecommerce.Models
+
+@{
+    ViewData["Title"] = Model.Ten;
+    var similarProducts = ViewBag.SimilarProducts as List<Ecommerce.Models.SanPham> ?? new List<Ecommerce.Models.SanPham>();
+    var avgRating = Model.DanhGias?.Any() == true ? Model.DanhGias.Average(d => d.SoSao) : 0;
+    var reviewCount = Model.DanhGias?.Count ?? 0;
+    var displayVariant = ProductPriceHelper.GetDisplayVariant(Model);
+    var displayRegularPrice = ProductPriceHelper.GetRegularPrice(Model, displayVariant);
+    var displaySalePrice = ProductPriceHelper.GetSalePrice(Model, displayVariant);
+    var displayPrice = ProductPriceHelper.GetEffectivePrice(Model, displayVariant);
+    var avgRatingString = string.Format(CultureInfo.InvariantCulture, "{0}", avgRating);
+    string NormalizeSize(string? size)
+    {
+        var normalized = (size ?? string.Empty).Trim().ToLowerInvariant().Replace(" ", string.Empty);
+        var match = Regex.Match(normalized, @"^(\d+(?:[.,]\d+)?)(?:gb|g|tb|t)?$");
+        return match.Success ? match.Groups[1].Value.Replace(',', '.') : normalized;
+    }
+    var mainImage = Model.SanPhamAnhs?.FirstOrDefault(image => image.IsMain && string.IsNullOrWhiteSpace(image.MauSac))?.DuongDan
+        ?? Model.DuongDanAnh;
+    var colorVariants = Model.KichThuocSanPhams
+        .Where(k => !string.IsNullOrWhiteSpace(k.MauSac))
+        .GroupBy(k => k.MauSac.Trim(), StringComparer.OrdinalIgnoreCase)
+        .Select(group => new
+        {
+            Color = group.First().MauSac.Trim(),
+            ImageUrl = Model.SanPhamAnhs?.FirstOrDefault(image =>
+                string.Equals(image.MauSac?.Trim(), group.Key, StringComparison.OrdinalIgnoreCase))?.DuongDan ?? Model.DuongDanAnh
+        })
+        .ToList();
+    var sizeVariants = Model.KichThuocSanPhams
+        .GroupBy(k => NormalizeSize(k.KichThuoc), StringComparer.OrdinalIgnoreCase)
+        .Select(group => new
+        {
+            Size = group.First().KichThuoc,
+            TotalStock = group.Sum(k => k.TonKho),
+            Variants = group.Select(k => new
+            {
+                color = (k.MauSac ?? string.Empty).Trim(),
+                variantId = k.Id,
+                stock = k.TonKho,
+                regularPrice = k.Gia ?? Model.Gia,
+                salePrice = k.GiaGiam ?? Model.GiaGiam
+            }).ToList(),
+            IsActive = group.Any(k => displayVariant?.Id == k.Id)
+        })
+        .ToList();
+    var allImages = new List<string>();
+    if (!string.IsNullOrEmpty(mainImage))
+    {
+        allImages.Add(mainImage);
+    }
+    if (Model.SanPhamAnhs != null)
+    {
+        allImages.AddRange(Model.SanPhamAnhs
+            .Where(i => string.IsNullOrWhiteSpace(i.MauSac))
+            .Select(i => i.DuongDan)
+            .Where(p => !string.Equals(p, mainImage, StringComparison.OrdinalIgnoreCase)));
+    }
+    allImages = allImages.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Chitietsanpham.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .stars .bi-star-fill,
+        .stars .bi-star-half,
+        .stars .bi-star {
+            color: #ffc107;
+        }
+
+        .size-option-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .size-option {
+            margin-bottom: 5px;
+        }
+        
+        .size-option.out-of-stock {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #dee2e6;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .stock-info {
+            font-size: 12px;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 12px;
+            white-space: nowrap;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .stock-info.low-stock {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .stock-info.no-stock {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .stock-info:not(.low-stock):not(.no-stock) {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .toast-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 9999;
+            transform: translateX(120%);
+            transition: transform 0.4s ease-in-out;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .toast-message.show {
+            transform: translateX(0);
+        }
+        .toast-success {
+            background-color: #28a745;
+        }
+        .toast-error {
+            background-color: #dc3545;
+        }
+        .toast-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+    </style>
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container">
+    <nav class="breadcrumb">
+        <a href="@Url.Action("Index", "Home")">Trang Chủ</a>
+        <span>›</span>
+        <a href="@Url.Action("Index", "SanPham", new { danhMucId = Model.DanhMucId })">@Model.DanhMuc?.Ten</a>
+        <span>›</span>
+        <span>@Model.Ten</span>
+    </nav>
+
+    <div class="product-detail-container">
+        <div class="product-gallery">
+            <div class="thumbnail-gallery">
+                @if (allImages.Count > 4)
+                {
+                    <button type="button" class="thumbnail-nav thumbnail-nav-up" aria-label="Ảnh trước">
+                        <i class="bi bi-chevron-up"></i>
+                    </button>
+                }
+                <div class="thumbnail-container">
+                    <div class="thumbnail-track">
+                        @foreach (var imageUrl in allImages)
+                        {
+                            <div class="thumbnail-item" onclick="changeMainImage('/@imageUrl')">
+                                <img src="/@imageUrl" alt="Thumbnail">
+                            </div>
+                        }
+                    </div>
+                </div>
+                @if (allImages.Count > 4)
+                {
+                    <button type="button" class="thumbnail-nav thumbnail-nav-down" aria-label="Ảnh tiếp theo">
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                }
+            </div>
+            <div class="main-image-container">
+                <img src="/@mainImage" alt="@Model.Ten" id="main-image">
+            </div>
+        </div>
+
+        <div class="product-info-container">
+            <div class="product-header">
+                <h1 class="product-title">@Model.Ten</h1>
+                <button class="favorite-btn" onclick="toggleFavorite(this, @Model.Id)">
+                    <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+                </button>
+            </div>
+
+            <div class="product-price-rating">
+                <div class="product-price-group">
+                    <span class="original-detail-price @(displaySalePrice.HasValue && displaySalePrice.Value < displayRegularPrice ? "has-sale" : "d-none")" id="original-product-price">
+                        @displayRegularPrice.ToString("N0", new CultureInfo("vi-VN")) VNĐ
+                    </span>
+                    <span class="product-price" id="product-price">@displayPrice.ToString("N0", new CultureInfo("vi-VN")) VNĐ</span>
+                </div>
+                <div class="product-rating">
+                    <div class="stars">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= avgRating)
+                            {
+                                <i class="bi bi-star-fill"></i>
+                            }
+                            else if (i - 0.5 <= avgRating)
+                            {
+                                <i class="bi bi-star-half"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-star"></i>
+                            }
+                        }
+                    </div>
+                    <span class="review-count">(@reviewCount Lượt Bán)</span>
+                </div>
+            </div>
+
+            <div class="option-group">
+                <p class="option-label">Màu sắc</p>
+                <div class="color-options">
+                    @foreach (var color in colorVariants)
+                    {
+                        <div class="color-option" data-color="@color.Color" data-image="/@color.ImageUrl" title="@color.Color">
+                            <img src="/@color.ImageUrl" alt="@color.Color">
+                            <span>@color.Color</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="option-group">
+                <p class="option-label">Kích Thước Sản Phẩm</p>
+                <div class="size-options">
+                    @if (Model.KichThuocSanPhams != null)
+                    {
+                        @foreach (var sizeGroup in sizeVariants)
+                        {
+                            var initialVariant = sizeGroup.Variants.FirstOrDefault(v => v.variantId == displayVariant?.Id)
+                                ?? sizeGroup.Variants.FirstOrDefault(v => v.stock > 0)
+                                ?? sizeGroup.Variants.First();
+                            <div class="size-option-container">
+                                <button class="size-option @(sizeGroup.TotalStock <= 0 ? "out-of-stock" : "")" 
+                                        data-size="@sizeGroup.Size"
+                                        data-variants="@JsonSerializer.Serialize(sizeGroup.Variants)"
+                                        data-stock="@initialVariant.stock"
+                                        data-variant-id="@initialVariant.variantId"
+                                        data-regular-price="@initialVariant.regularPrice"
+                                        data-sale-price="@initialVariant.salePrice"
+                                        data-active="@(sizeGroup.IsActive ? "true" : "false")"
+                                        @(sizeGroup.TotalStock <= 0 ? "disabled" : "")>
+                                    @sizeGroup.Size
+                                </button>
+                                <span class="stock-info @(sizeGroup.TotalStock <= 5 ? "low-stock" : "") @(sizeGroup.TotalStock <= 0 ? "no-stock" : "")">
+                                    @if (sizeGroup.TotalStock <= 0)
+                                    {
+                                        <span>Hết hàng</span>
+                                    }
+                                    else if (sizeGroup.TotalStock <= 5)
+                                    {
+                                        <span>Còn @sizeGroup.TotalStock</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Còn @sizeGroup.TotalStock</span>
+                                    }
+                                </span>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="add-to-cart-row">
+                <div class="quantity-selector">
+                    <button class="quantity-btn" onclick="updateQuantity(-1)">-</button>
+                    <input type="text" class="quantity-input" value="1" min="1" id="quantity-input" readonly>
+                    <button class="quantity-btn" onclick="updateQuantity(1)">+</button>
+                </div>
+                <button class="btn btn-add-to-cart" onclick="addToCart()">Thêm Vào Giỏ Hàng <span style="font-size: 20px;">›</span></button>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-buy-now" onclick="buyNow()">Mua Ngay <span style="font-size: 20px;">›</span></button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="product-description-section">
+        <h2 class="description-title">Mô Tả Sản Phẩm</h2>
+        <div class="description-content">
+            @if (!string.IsNullOrEmpty(Model.MoTa))
+            {
+                <p><strong>@Model.Ten</strong></p>
+                <p>@Model.MoTa</p>
+                <ul>
+                    <li><strong>Danh mục:</strong> @Model.DanhMuc?.Ten</li>
+                    <li><strong>Giá gốc:</strong> @Model.Gia.ToString("N0", new CultureInfo("vi-VN")) VNĐ</li>
+                    @if (Model.GiaGiam.HasValue && Model.GiaGiam.Value < Model.Gia)
+                    {
+                        <li><strong>Giá khuyến mãi:</strong> @Model.GiaGiam.Value.ToString("N0", new CultureInfo("vi-VN")) VNĐ</li>
+                        <li><strong>Tiết kiệm:</strong> @((Model.Gia - Model.GiaGiam.Value).ToString("N0", new CultureInfo("vi-VN"))) VNĐ</li>
+                    }
+                    <li><strong>Số lượng bán:</strong> @Model.SoLuongBan sản phẩm</li>
+                </ul>
+                <p>Laptop chất lượng cao với thiết kế hiện đại và hiệu năng mạnh mẽ. Phù hợp cho công việc, học tập và giải trí. Được bảo hành chính hãng và hỗ trợ kỹ thuật 24/7.</p>
+            }
+        </div>
+    </div>
+
+    <div class="reviews-section">
+        <h2 class="description-title">Đánh Giá</h2>
+        @if (Model.DanhGias != null && Model.DanhGias.Any())
+        {
+            foreach (var review in Model.DanhGias.Take(3))
+            {
+                <div class="review-item">
+                    <div class="review-content">
+                        <div class="review-header">
+                            <span class="reviewer-name">@(review.NguoiDung?.HoTen ?? "Khách hàng")</span>
+                            <div class="stars">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= review.SoSao)
+                                    {
+                                        <i class="bi bi-star-fill"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-star"></i>
+                                    }
+                                }
+                            </div>
+                        </div>
+                        <p class="review-text">@review.BinhLuan</p>
+                        <span class="review-date">@review.NgayTao.ToString("dd/MM/yyyy")</span>
+                    </div>
+                </div>
+            }
+             @if (Model.DanhGias?.Count > 3)
+            {
+                <button class="view-more-btn">Xem Thêm</button>
+            }
+        }
+        else
+        {
+            <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+        }
+    </div>
+
+    <div class="similar-products">
+        <h2 class="description-title">Sản Phẩm Tương Tự</h2>
+        <div class="products-grid">
+             @foreach (var product in similarProducts)
+            {
+                <a href="@Url.Action("Details", "SanPham", new { id = product.Id })" class="product-card">
+                    <img src="/@product.DuongDanAnh" alt="@product.Ten">
+                    <div class="product-info">
+                        <h3>@product.Ten</h3>
+                        <p>@product.Gia.ToString("N0", new CultureInfo("vi-VN")) VNĐ</p>
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        checkFavoriteStatus(@Model.Id);
+        document.querySelector('.thumbnail-item')?.classList.add('active');
+        initializeThumbnailNavigation();
+        const initialButton = document.querySelector('.size-option[data-active="true"]') || document.querySelector('.size-option');
+        initialButton?.classList.add('active');
+        if (initialButton) {
+            const initialVariant = selectVariantForSize(initialButton);
+            updateVariantData(initialButton, initialVariant);
+            updateDisplayedPrice(initialButton);
+            updateSelectedColor(initialVariant?.color);
+        } else {
+            document.querySelector('.color-option')?.classList.add('active');
+        }
+    });
+
+    function changeMainImage(src) {
+        document.getElementById('main-image').src = src;
+        document.querySelectorAll('.thumbnail-item').forEach(thumb => {
+            thumb.classList.remove('active');
+            if (thumb.querySelector('img').src.endsWith(src)) {
+                thumb.classList.add('active');
+            }
+        });
+    }
+
+    function initializeThumbnailNavigation() {
+        const gallery = document.querySelector('.thumbnail-gallery');
+        const container = gallery?.querySelector('.thumbnail-container');
+        const track = gallery?.querySelector('.thumbnail-track');
+        if (!gallery || !container || !track) return;
+
+        const originalThumbnails = Array.from(track.querySelectorAll('.thumbnail-item'));
+        const visibleCount = 4;
+        if (originalThumbnails.length <= visibleCount) return;
+
+        originalThumbnails.slice(-(visibleCount - 1)).reverse().forEach(thumbnail => {
+            const clone = thumbnail.cloneNode(true);
+            clone.classList.add('thumbnail-clone');
+            track.insertBefore(clone, track.firstChild);
+        });
+        originalThumbnails.slice(0, visibleCount - 1).forEach(thumbnail => {
+            const clone = thumbnail.cloneNode(true);
+            clone.classList.add('thumbnail-clone');
+            track.appendChild(clone);
+        });
+
+        const leadingCloneCount = visibleCount - 1;
+        const itemCount = originalThumbnails.length;
+        let windowStart = leadingCloneCount;
+
+        const updateThumbnailWindow = () => {
+            track.style.transform = `translateY(-${windowStart * 110}px)`;
+        };
+        track.style.transition = 'none';
+        updateThumbnailWindow();
+        requestAnimationFrame(() => {
+            track.style.transition = 'transform 0.25s ease';
+        });
+
+        const changeThumbnail = (direction) => {
+            windowStart += direction;
+            updateThumbnailWindow();
+
+            const reachedEnd = windowStart === leadingCloneCount + itemCount;
+            const reachedStart = windowStart === leadingCloneCount - 1;
+            if (reachedEnd || reachedStart) {
+                setTimeout(() => {
+                    windowStart = reachedEnd
+                        ? leadingCloneCount
+                        : leadingCloneCount + itemCount - 1;
+                    track.style.transition = 'none';
+                    updateThumbnailWindow();
+                    requestAnimationFrame(() => {
+                        track.style.transition = 'transform 0.25s ease';
+                    });
+                }, 260);
+            }
+
+            const logicalIndex = (windowStart - leadingCloneCount + itemCount) % itemCount;
+            const image = originalThumbnails[logicalIndex].querySelector('img');
+            if (image) {
+                changeMainImage(image.src);
+            }
+        };
+
+        gallery.querySelector('.thumbnail-nav-up')?.addEventListener('click', () => changeThumbnail(-1));
+        gallery.querySelector('.thumbnail-nav-down')?.addEventListener('click', () => changeThumbnail(1));
+    }
+
+    function updateQuantity(amount) {
+        const input = document.getElementById('quantity-input');
+        const selectedSize = document.querySelector('.size-option.active');
+        const maxStock = selectedSize ? parseInt(selectedSize.dataset.stock) : 999;
+        
+        let currentValue = parseInt(input.value);
+        currentValue += amount;
+        
+        if (currentValue < 1) {
+            currentValue = 1;
+        } else if (currentValue > maxStock) {
+            currentValue = maxStock;
+            showMessage(`Chỉ còn ${maxStock} sản phẩm trong kho`, 'warning');
+        }
+        
+        input.value = currentValue;
+    }
+
+    document.querySelectorAll('.size-option').forEach(button => {
+        button.addEventListener('click', function() {
+            if (this.disabled) return;
+            
+            document.querySelectorAll('.size-option').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            const variant = selectVariantForSize(this);
+            if (!variant) return;
+            updateVariantData(this, variant);
+            updateDisplayedPrice(this);
+            updateSelectedColor(variant.color);
+            
+            const stock = parseInt(this.dataset.stock);
+            const quantityInput = document.getElementById('quantity-input');
+            quantityInput.max = stock;
+            
+            if (parseInt(quantityInput.value) > stock) {
+                quantityInput.value = 1;
+            }
+            
+            if (stock <= 5 && stock > 0) {
+                showMessage(`Chỉ còn ${stock} sản phẩm trong kho`, 'warning');
+            }
+        });
+    });
+
+    document.querySelectorAll('.color-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const color = this.dataset.color;
+            const matchingSize = Array.from(document.querySelectorAll('.size-option'))
+                .find(button => getVariants(button).some(variant =>
+                    normalizeColor(variant.color) === normalizeColor(color) && variant.stock > 0));
+
+            if (matchingSize) {
+                document.querySelectorAll('.size-option').forEach(btn => btn.classList.remove('active'));
+                matchingSize.classList.add('active');
+                const variant = selectVariantForSize(matchingSize, color);
+                updateVariantData(matchingSize, variant);
+                updateDisplayedPrice(matchingSize);
+                updateSelectedColor(color);
+                changeMainImage(this.dataset.image);
+
+                const stock = parseInt(matchingSize.dataset.stock);
+                const quantityInput = document.getElementById('quantity-input');
+                quantityInput.max = stock;
+                if (parseInt(quantityInput.value) > stock) {
+                    quantityInput.value = 1;
+                }
+
+                if (stock <= 5 && stock > 0) {
+                    showMessage(`Chỉ còn ${stock} sản phẩm trong kho`, 'warning');
+                }
+            } else {
+                updateSelectedColor(color);
+            }
+        });
+    });
+
+    function updateSelectedColor(color) {
+        if (!color) return;
+
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.classList.toggle('active', normalizeColor(option.dataset.color) === normalizeColor(color));
+        });
+    }
+
+    function normalizeColor(color) {
+        return (color || '').trim().toLocaleLowerCase('vi-VN');
+    }
+
+    function updateDisplayedPrice(button) {
+        const regularPrice = parseFloat(button.dataset.regularPrice);
+        const salePrice = button.dataset.salePrice ? parseFloat(button.dataset.salePrice) : null;
+        const price = salePrice !== null && salePrice < regularPrice ? salePrice : regularPrice;
+        const originalPriceElement = document.getElementById('original-product-price');
+
+        if (salePrice !== null && salePrice < regularPrice) {
+            originalPriceElement.textContent = regularPrice.toLocaleString('vi-VN') + ' VNĐ';
+            originalPriceElement.classList.remove('d-none');
+        } else {
+            originalPriceElement.classList.add('d-none');
+        }
+
+        document.getElementById('product-price').textContent = price.toLocaleString('vi-VN') + ' VNĐ';
+    }
+
+    function getVariants(button) {
+        try {
+            return JSON.parse(button.dataset.variants || '[]');
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function selectVariantForSize(button, color) {
+        const variants = getVariants(button);
+        const selectedColor = color || document.querySelector('.color-option.active')?.dataset.color;
+        return variants.find(variant =>
+            variant.stock > 0 && selectedColor &&
+            normalizeColor(variant.color) === normalizeColor(selectedColor))
+            || variants.find(variant => variant.stock > 0)
+            || variants[0];
+    }
+
+    function updateVariantData(button, variant) {
+        if (!variant) return;
+        button.dataset.variantId = variant.variantId;
+        button.dataset.stock = variant.stock;
+        button.dataset.regularPrice = variant.regularPrice;
+        button.dataset.salePrice = variant.salePrice ?? '';
+    }
+
+    function checkFavoriteStatus(productId) {
+        const favoriteBtn = document.querySelector('.favorite-btn');
+        if (!favoriteBtn) return;
+        fetch(`/YeuThich/CheckStatus/${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.isFavorited) {
+                    favoriteBtn.classList.add('favorited');
+                } else {
+                    favoriteBtn.classList.remove('favorited');
+                }
+            });
+    }
+
+    function toggleFavorite(element, productId) {
+        return window.toggleFavoriteAjax(element, productId);
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        const formData = new FormData();
+        formData.append('__RequestVerificationToken', token);
+        
+        fetch(`/YeuThich/Toggle/${productId}`, { 
+            method: 'POST', 
+            body: formData,
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                element.classList.toggle('favorited', data.favorited);
+                showMessage(data.favorited ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích', 'success');
+            } else if (data.redirectTo) {
+                showMessage('Vui lòng đăng nhập', 'error');
+                setTimeout(() => window.location.href = data.redirectTo, 1500);
+            } else {
+                showMessage(data.message || 'Có lỗi xảy ra', 'error');
+            }
+        });
+    }
+
+    function addToCart() {
+        const selectedSizeButton = document.querySelector('.size-option.active');
+        if (!selectedSizeButton) {
+            showMessage('Vui lòng chọn kích thước!', 'error');
+            return Promise.reject('Vui lòng chọn kích thước');
+        }
+
+        const selectedSize = selectedSizeButton.dataset.size;
+        const availableStock = parseInt(selectedSizeButton.dataset.stock);
+        const requestedQuantity = parseInt(document.getElementById('quantity-input').value);
+
+        if (availableStock <= 0) {
+            showMessage('Sản phẩm đã hết hàng!', 'error');
+            return Promise.reject('Sản phẩm đã hết hàng');
+        }
+
+        if (requestedQuantity > availableStock) {
+            showMessage(`Chỉ còn ${availableStock} sản phẩm trong kho!`, 'error');
+            return Promise.reject('Vượt quá số lượng tồn kho');
+        }
+
+        const data = {
+            sanPhamId: @Model.Id,
+            variantId: parseInt(selectedSizeButton.dataset.variantId),
+            size: selectedSize,
+            quantity: requestedQuantity
+        };
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        return fetch('/GioHang/AddToCart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+            body: JSON.stringify(data),
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(res => {
+            if (res.success) {
+                updateHeaderCount('.cart-badge', res.cartCount);
+                showMessage(res.message, 'success');
+                return res;
+            } else {
+                showMessage('Lỗi: ' + res.message, 'error');
+                throw new Error(res.message);
+            }
+        });
+    }
+
+    async function buyNow() {
+        try {
+            await addToCart();
+            setTimeout(() => window.location.href = '/GioHang', 1000);
+        } catch (error) {
+            console.error('Không thể thêm vào giỏ hàng trước khi mua ngay:', error);
+        }
+    }
+
+    function showMessage(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `toast-message toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
+</script>
+}

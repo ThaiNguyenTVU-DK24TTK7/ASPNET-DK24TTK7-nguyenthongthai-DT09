@@ -1,0 +1,89 @@
+@model Ecommerce.ViewModels.AdminBannerViewModel
+@{
+    ViewData["Title"] = "Quản lý banner";
+    Layout = "_AdminLayout";
+}
+
+@section Styles {
+    <style>
+        .admin-banner-row {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .admin-banner-row img {
+            flex: 0 0 180px;
+            width: 180px;
+            height: 64px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .admin-banner-row form {
+            flex: 0 0 auto;
+        }
+
+        @@media (max-width: 768px) {
+            .admin-banner-row img {
+                flex-basis: 120px;
+                width: 120px;
+                height: 44px;
+            }
+        }
+    </style>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Thêm banner</h5>
+                <form asp-action="AddBanner" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="mb-3">
+                        <label asp-for="ImageFile" class="form-label">Ảnh banner ngang</label>
+                        <input asp-for="ImageFile" class="form-control" type="file" accept="image/jpeg,image/png,image/webp" />
+                        <small class="text-muted">Nên dùng ảnh tỉ lệ khoảng 2.8:1 như banner mẫu.</small>
+                        <span asp-validation-for="ImageFile" class="text-danger d-block"></span>
+                    </div>
+                    <div class="mb-3"><label asp-for="Title" class="form-label">Tên/alt</label><input asp-for="Title" class="form-control" /></div>
+                    <div class="mb-3"><label asp-for="LinkUrl" class="form-label">Đường dẫn khi bấm</label><input asp-for="LinkUrl" class="form-control" placeholder="/SanPham" /></div>
+                    <div class="mb-3"><label asp-for="DisplayOrder" class="form-label">Thứ tự</label><input asp-for="DisplayOrder" class="form-control" type="number" min="0" /></div>
+                    <div class="form-check mb-3"><input asp-for="IsActive" class="form-check-input" /><label asp-for="IsActive" class="form-check-label">Hiển thị ngay</label></div>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-upload me-1"></i> Tải lên</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Danh sách banner</h5>
+                @if (!Model.Banners.Any())
+                {
+                    <p class="text-muted mb-0">Chưa có banner tùy chỉnh. Trang chủ đang dùng ảnh mặc định.</p>
+                }
+                else
+                {
+                    foreach (var banner in Model.Banners)
+                    {
+                        <div class="admin-banner-row @(banner.IsActive ? "" : "opacity-50")">
+                            <img src="/@banner.ImageUrl.TrimStart('/')" alt="@banner.Title" />
+                            <div class="flex-grow-1"><strong>@(string.IsNullOrWhiteSpace(banner.Title) ? "Banner không có tên" : banner.Title)</strong><div class="small text-muted">Thứ tự: @banner.DisplayOrder · @(banner.IsActive ? "Đang hiển thị" : "Đang ẩn")</div></div>
+                            <form asp-action="ToggleBanner" method="post"><input type="hidden" name="id" value="@banner.Id" /><button class="btn btn-sm btn-outline-secondary" title="@(banner.IsActive ? "Ẩn banner" : "Hiện banner")"><i class="bi @(banner.IsActive ? "bi-eye-slash" : "bi-eye")"></i></button></form>
+                            <form asp-action="DeleteBanner" method="post" onsubmit="return confirm('Xóa banner này?');"><input type="hidden" name="id" value="@banner.Id" /><button class="btn btn-sm btn-outline-danger" title="Xóa"><i class="bi bi-trash"></i></button></form>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts { @{await Html.RenderPartialAsync("_ValidationScriptsPartial");} }

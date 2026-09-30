@@ -1,0 +1,133 @@
+@model List<Ecommerce.ViewModels.AdminOrderListViewModel>
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .order-header h3 {
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .order-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .order-actions input[type="text"] {
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            padding: 6px 12px;
+        }
+        .order-actions select {
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            padding: 6px 12px;
+        }
+        .order-table th {
+            background: #f3f4f6;
+            font-weight: 600;
+            border-top: none;
+        }
+        .order-table td, .order-table th {
+            vertical-align: middle;
+        }
+        .order-table tr {
+            transition: background 0.15s;
+        }
+        .order-table tr:hover {
+            background: #f5f5f5;
+        }
+        .badge-status {
+            font-size: 0.95em;
+            padding: 0.5em 1em;
+            border-radius: 1em;
+            font-weight: 500;
+        }
+        .badge-delivered {
+            background: #e0f7fa;
+            color: #00796b;
+        }
+        .badge-canceled {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .badge-other {
+            background: #e3e3e3;
+            color: #333;
+        }
+        @@media (max-width: 900px) {
+            .order-header, .order-actions { flex-direction: column; align-items: stretch; }
+            .order-actions { gap: 8px; margin-top: 10px; }
+        }
+    </style>
+}
+
+<div>
+    <div class="order-header">
+        <h3><i class="bi bi-bag-check me-2"></i>Danh sách đơn hàng</h3>
+        <div class="order-actions">
+            <input type="text" placeholder="Tìm kiếm theo tên khách, mã đơn..." />
+            <select>
+                <option value="">Tất cả trạng thái</option>
+                <option>Đã giao</option>
+                <option>Chờ xác nhận</option>
+                <option>Đang giao</option>
+                <option>Đã hủy</option>
+            </select>
+        </div>
+    </div>
+    <div class="card shadow-sm rounded-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table order-table align-middle">
+                    <thead>
+                        <tr>
+                            <th><i class="bi bi-hash"></i> Mã đơn</th>
+                            <th><i class="bi bi-person"></i> Khách hàng</th>
+                            <th><i class="bi bi-info-circle"></i> Trạng thái</th>
+                            <th><i class="bi bi-cash-coin"></i> Tổng tiền</th>
+                            <th><i class="bi bi-calendar"></i> Ngày tạo</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var o in Model)
+                        {
+                            <tr>
+                                <td>@o.OrderCode</td>
+                                <td>@o.CustomerName</td>
+                                <td>
+                                    @if (o.Status == "Đã giao")
+                                    {
+                                        <span class="badge-status badge-delivered"><i class="bi bi-truck"></i> Delivered</span>
+                                    }
+                                    else if (o.Status.Contains("Hủy"))
+                                    {
+                                        <span class="badge-status badge-canceled"><i class="bi bi-x-circle"></i> Canceled</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-status badge-other">@o.Status</span>
+                                    }
+                                </td>
+                                <td>@o.TotalAmount.ToString("N0") VNĐ</td>
+                                <td>@o.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <a asp-action="EditOrderStatus" asp-route-id="@o.OrderId" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i> Sửa</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div> 

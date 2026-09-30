@@ -1,0 +1,60 @@
+@model Ecommerce.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+<div class="form-container" style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-width: 400px; margin: 40px auto;">
+    <h1 class="form-title" style="font-size:24px; font-weight:600; color:#333; text-align:center; margin-bottom:32px;">Đăng Nhập</h1>
+    <form asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" autocomplete="off">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group" style="margin-bottom:20px;">
+            <label class="form-label" asp-for="TenDangNhap"></label>
+            <input asp-for="TenDangNhap" class="form-input form-control" placeholder="Tên đăng nhập" autofocus />
+            <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+        </div>
+        <div class="form-group" style="margin-bottom:20px;">
+            <label class="form-label" asp-for="MatKhau"></label>
+            <div class="input-wrapper" style="position:relative;">
+                <input asp-for="MatKhau" class="form-input form-control" placeholder="Mật khẩu" type="password" id="password" />
+                <button type="button" class="password-toggle" onclick="togglePassword('password')" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#6c757d; font-size:20px; padding:4px;">
+                    <i class="bi bi-eye" id="icon-password"></i>
+                </button>
+            </div>
+            <span asp-validation-for="MatKhau" class="text-danger"></span>
+        </div>
+        <div class="checkbox-group" style="display:flex; align-items:center; margin-bottom:20px;">
+            <input asp-for="GhiNhoToi" class="checkbox-input" style="margin-right:8px; width:16px; height:16px;">
+            <label asp-for="GhiNhoToi" class="checkbox-label" style="font-size:14px; color:#666; cursor:pointer;"></label>
+        </div>
+        <button type="submit" class="submit-btn btn btn-primary w-100 mt-2">Đăng Nhập</button>
+        <div class="forgot-password" style="text-align:center; margin-top:10px;">
+            <a href="#" onclick="alert('Chức năng quên mật khẩu sẽ được bổ sung sau!')">Quên Mật Khẩu</a>
+        </div>
+        <div class="signup-link" style="text-align:center; margin-top:10px; font-size:14px;">
+            Nếu chưa có tài khoản <a href="@Url.Action("Register", "Account")">Tạo tài khoản mới</a>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    <script>
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById('icon-' + inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) {
+                    icon.classList.remove('bi-eye');
+                    icon.classList.add('bi-eye-slash');
+                }
+            } else {
+                input.type = 'password';
+                if (icon) {
+                    icon.classList.remove('bi-eye-slash');
+                    icon.classList.add('bi-eye');
+                }
+            }
+        }
+    </script>
+    <partial name="_ValidationScriptsPartial" />
+} 
