@@ -38,3 +38,14 @@ Thư mục lưu báo cáo tiến độ thực hiện dự án theo từng tuần
 - Bổ sung chức năng liên hệ, đánh giá sản phẩm, lưu giỏ hàng, thanh toán MoMo, xem đơn đặt hàng và xử lý trạng thái thanh toán thành công/thất bại.
 - Nâng cấp giao diện bằng CSS và JavaScript tùy chỉnh cho các module như Home, Sanpham, GioHang, Contact, AdminDashboard và OrderHistory.
 - Tạo dữ liệu hình ảnh sản phẩm, banner và sử dụng thư viện Bootstrap để hoàn thiện trải nghiệm người dùng và giao diện dự án.
+
+## Tuần 5 (05/10/2026 - 11/10/2026)
+
+- Hoàn thiện luồng mua hàng từ xem chi tiết sản phẩm, chọn biến thể và thêm sản phẩm vào giỏ hàng đến đặt hàng và thanh toán.
+- Tích hợp thanh toán MoMo, xử lý trạng thái thanh toán thành công/thất bại và hiển thị thông tin kết quả cho người dùng.
+- Bổ sung trang lịch sử đơn hàng, xem chi tiết đơn hàng và cập nhật trạng thái đơn hàng trong khu vực quản trị.
+- Hoàn thiện chức năng tài khoản gồm đăng ký, đăng nhập, hồ sơ cá nhân và đổi mật khẩu.
+- Phát triển chức năng yêu thích sản phẩm, đánh giá sản phẩm và gửi liên hệ từ phía người dùng.
+- Hoàn thiện dashboard quản trị và các chức năng quản lý sản phẩm, danh mục, người dùng, đơn hàng, liên hệ và banner.
+- Bổ sung quản lý phiếu nhập, chi tiết phiếu nhập và hỗ trợ theo dõi dữ liệu nhập kho.
+- Nâng cấp cơ sở dữ liệu và giao diện sản phẩm với biến thể giá, thương hiệu, màu sắc hình ảnh và lựa chọn ảnh chính.
