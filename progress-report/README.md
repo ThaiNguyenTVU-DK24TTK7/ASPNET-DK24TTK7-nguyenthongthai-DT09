@@ -49,3 +49,24 @@ Thư mục lưu báo cáo tiến độ thực hiện dự án theo từng tuần
 - Hoàn thiện dashboard quản trị và các chức năng quản lý sản phẩm, danh mục, người dùng, đơn hàng, liên hệ và banner.
 - Bổ sung quản lý phiếu nhập, chi tiết phiếu nhập và hỗ trợ theo dõi dữ liệu nhập kho.
 - Nâng cấp cơ sở dữ liệu và giao diện sản phẩm với biến thể giá, thương hiệu, màu sắc hình ảnh và lựa chọn ảnh chính.
+
+## Tuần 6 (12/10/2026 - 18/10/2026)
+
+- Hoàn thiện và rà soát các chức năng phía người dùng gồm đăng ký, đăng nhập, quản lý hồ sơ, đổi mật khẩu và xem lịch sử đơn hàng.
+- Hoàn thiện giỏ hàng với chức năng thêm sản phẩm theo biến thể, cập nhật số lượng, xóa sản phẩm và hiển thị số lượng sản phẩm trong giỏ.
+- Hoàn thiện quy trình đặt hàng, lưu địa chỉ và ghi chú đơn hàng, đồng thời xử lý thanh toán MoMo và các trạng thái thanh toán.
+- Bổ sung và kiểm tra chức năng yêu thích, đánh giá sản phẩm và gửi liên hệ từ phía khách hàng.
+- Hoàn thiện khu vực quản trị với dashboard thống kê, biểu đồ doanh thu, quản lý sản phẩm, danh mục, người dùng, đơn hàng và trạng thái đơn hàng.
+- Hoàn thiện quản lý banner, hình ảnh sản phẩm, ảnh chính, màu sắc sản phẩm và quản lý phiếu nhập kho.
+- Rà soát các migration và quan hệ dữ liệu Entity Framework Core để bảo đảm thông tin sản phẩm, biến thể, đơn hàng, đánh giá và kho được lưu trữ đồng bộ.
+- Kiểm tra giao diện responsive, validation biểu mẫu và các luồng chính của hệ thống trên môi trường phát triển.
+
+## Tuần 7 (19/10/2026 - 25/10/2026)
+
+- Tổng hợp nội dung đã thực hiện và viết báo cáo tiến độ, báo cáo đồ án theo cấu trúc được yêu cầu.
+- Mô tả bài toán, mục tiêu, phạm vi, yêu cầu chức năng và kiến trúc hệ thống trong báo cáo.
+- Bổ sung các sơ đồ phân tích và thiết kế như sơ đồ use case, sơ đồ cơ sở dữ liệu và sơ đồ luồng xử lý.
+- Chụp và chọn ảnh minh họa các giao diện chính: trang chủ, sản phẩm, giỏ hàng, thanh toán, tài khoản và khu vực quản trị.
+- Trình bày cách triển khai các chức năng nổi bật như quản lý sản phẩm, đặt hàng, thanh toán MoMo, đánh giá và quản lý kho.
+- Kiểm tra, chỉnh sửa nội dung, định dạng tài liệu, danh mục hình ảnh và tài liệu tham khảo trước khi hoàn thiện báo cáo.
+- Rà soát mã nguồn, cập nhật README và chuẩn bị phiên bản dự án phục vụ nghiệm thu, thuyết trình và bảo vệ.
